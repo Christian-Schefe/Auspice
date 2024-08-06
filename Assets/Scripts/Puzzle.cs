@@ -56,6 +56,10 @@ public class Puzzle
     {
         puzzleObjects[position].Remove(puzzleObject);
     }
+    public void RemoveObjects(Vector2Int position)
+    {
+        puzzleObjects[position].Clear();
+    }
 
     public void AddEntity<T>(T entity) where T : PuzzleEntity
     {
@@ -70,9 +74,9 @@ public class Puzzle
         }
     }
 
-    public void RemoveEntity<T>(T entity) where T : PuzzleEntity
+    public void RemoveEntity<T>(Vector2Int position) where T : PuzzleEntity
     {
-        puzzleEntities[entity.position].Remove(typeof(T));
+        if (!puzzleEntities[position].Remove(typeof(T), out var entity)) return;
         if (entity is Player player)
         {
             players.Remove(player);
@@ -81,6 +85,22 @@ public class Puzzle
         {
             buttons.Remove(button);
         }
+    }
+
+    public void RemoveEntities(Vector2Int position)
+    {
+        foreach (var entity in puzzleEntities[position].Values)
+        {
+            if (entity is Player player)
+            {
+                players.Remove(player);
+            }
+            else if (entity is ButtonEntity button)
+            {
+                buttons.Remove(button);
+            }
+        }
+        puzzleEntities[position].Clear();
     }
 
     public PuzzleState GetState()

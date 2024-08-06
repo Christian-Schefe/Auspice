@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class PuzzleObserver : MonoBehaviour
+public class PuzzleReplayer : MonoBehaviour
 {
-    public List<GameObject> players;
-    public List<GameObject> buttons;
-    public Tilemap groundTilemap;
+    public Level level;
 
     public Sprite buttonNormalSprite, buttonPressedSprite;
 
@@ -23,13 +21,13 @@ public class PuzzleObserver : MonoBehaviour
         {
             Debug.Log("Replaying: " + state);
             puzzle.SetState(state);
-            for (int i = 0; i < players.Count; i++)
+            for (int i = 0; i < level.players.Count; i++)
             {
-                players[i].transform.position = groundTilemap.GetCellCenterWorld((Vector3Int)puzzle.players[i].position);
+                level.players[i].transform.position = level.WorldPos(puzzle.players[i].position);
             }
-            for (int i = 0; i < buttons.Count; i++)
+            for (int i = 0; i < level.buttons.Count; i++)
             {
-                buttons[i].GetComponent<SpriteRenderer>().sprite = puzzle.buttons[i].isPressed ? buttonPressedSprite : buttonNormalSprite;
+                level.buttons[i].GetComponent<SpriteRenderer>().sprite = puzzle.buttons[i].isPressed ? buttonPressedSprite : buttonNormalSprite;
             }
 
             yield return new WaitForSeconds(0.2f);
