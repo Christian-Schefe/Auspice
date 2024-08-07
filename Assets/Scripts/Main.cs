@@ -1,12 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public class Main : MonoBehaviour
 {
     public PuzzleEditor editor;
-    public Level level;
     public PuzzleReplayer puzzleObserver;
 
     private void Update()
@@ -20,7 +18,7 @@ public class Main : MonoBehaviour
     private void Solve()
     {
         editor.isPlaying = true;
-        var puzzle = level.GetPuzzle();
+        var puzzle = editor.BuildPuzzle();
 
         var solver = new PuzzleSolver();
         var solution = solver.Solve(puzzle);

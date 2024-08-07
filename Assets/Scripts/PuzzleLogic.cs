@@ -11,7 +11,7 @@ public class PuzzleLogic
         this.puzzle = puzzle;
     }
 
-    public List<Puzzle.PuzzleState> GetNextStates(Puzzle.PuzzleState state)
+    public List<PuzzleState> GetNextStates(PuzzleState state)
     {
         puzzle.SetState(state);
 
@@ -25,7 +25,7 @@ public class PuzzleLogic
 
         var permutations = GetChoicePermutations(moves);
 
-        var nextStates = new List<Puzzle.PuzzleState>();
+        var nextStates = new List<PuzzleState>();
 
         foreach (var moveChoice in permutations)
         {
@@ -38,7 +38,7 @@ public class PuzzleLogic
         return nextStates;
     }
 
-    public bool TryMovePlayers(Puzzle.PuzzleState state, List<Vector2Int> to, out Puzzle.PuzzleState nextState)
+    public bool TryMovePlayers(PuzzleState state, List<Vector2Int> to, out PuzzleState nextState)
     {
         nextState = default;
 
@@ -71,11 +71,11 @@ public class PuzzleLogic
 
         for (int i = 0; i < players.Count; i++)
         {
-            if (!buttonToggleState && puzzle.HasObject(to[i], Puzzle.PuzzleObject.OnSpike))
+            if (!buttonToggleState && puzzle.HasObject(to[i], PuzzleObject.OnSpike))
             {
                 return false;
             }
-            else if (buttonToggleState && puzzle.HasObject(to[i], Puzzle.PuzzleObject.OffSpike))
+            else if (buttonToggleState && puzzle.HasObject(to[i], PuzzleObject.OffSpike))
             {
                 return false;
             }
@@ -87,15 +87,15 @@ public class PuzzleLogic
 
     private bool CanWalkStatic(Puzzle puzzle, Vector2Int pos)
     {
-        if (!puzzle.puzzleObjects.ContainsKey(pos))
+        if (!puzzle.IsValidPosition(pos))
         {
             return false;
         }
-        if (puzzle.HasObject(pos, Puzzle.PuzzleObject.Wall))
+        if (puzzle.HasObject(pos, PuzzleObject.Wall))
         {
             return false;
         }
-        if (puzzle.HasObject(pos, Puzzle.PuzzleObject.Water))
+        if (puzzle.HasObject(pos, PuzzleObject.Water))
         {
             return false;
         }

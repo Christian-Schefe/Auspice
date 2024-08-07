@@ -375,7 +375,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   editor: {fileID: 873624374}
-  level: {fileID: 873624375}
   puzzleObserver: {fileID: 873624373}
 --- !u!4 &873624372
 Transform:
@@ -404,11 +403,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd56ae75e9a36864c97319a903dd59a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  level: {fileID: 873624375}
-  buttonNormalSprite: {fileID: -366742648, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
-  buttonPressedSprite: {fileID: -2061729499, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
-  spikeOnTile: {fileID: 11400000, guid: ba4d33c1fb2638e4486776dd6ee121b9, type: 2}
-  spikeOffTile: {fileID: 11400000, guid: 6b051de75e4f578489a9b1b49a23e0fb, type: 2}
+  levelVisuals: {fileID: 873624375}
 --- !u!114 &873624374
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -422,7 +417,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mode: 0
-  level: {fileID: 873624375}
+  visuals: {fileID: 873624375}
   isPlaying: 0
 --- !u!114 &873624375
 MonoBehaviour:
@@ -433,7 +428,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 873624370}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 24f840909436e434bb2464861abbb0cd, type: 3}
+  m_Script: {fileID: 11500000, guid: d59a988d099588a40a0f86107eddf5f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   cam: {fileID: 519420031}
@@ -446,7 +441,8 @@ MonoBehaviour:
   buttonPrefab: {fileID: 8025678030024240444, guid: 5799c5c4344a9bc4f9f5814db652f1b6, type: 3}
   playerPrefab: {fileID: 7233996543299994278, guid: c6a28c7542ec3e34cbadc16144824994, type: 3}
   chestPrefab: {fileID: 5631947654605279188, guid: 951dee53ccb6e7246a5b4cec85fd6e33, type: 3}
-  size: {x: 12, y: 9}
+  buttonNotPressedSprite: {fileID: -366742648, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
+  buttonPressedSprite: {fileID: -2061729499, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
 --- !u!1 &1036060194
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,35 +1,47 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+public enum PuzzleObject
+{
+    Wall,
+    Water,
+    Chest,
+    OffSpike,
+    OnSpike
+}
+
 public class Puzzle
 {
-    public enum PuzzleObject
+    private readonly PuzzleData data;
+
+    private readonly Dictionary<PuzzleObject, List<Vector2Int>> objectsByType = new();
+    private readonly Dictionary<EntityType, List<PuzzleEntity>> entitiesByType = new();
+
+    public Puzzle(PuzzleData data)
     {
-        Wall,
-        Water,
-        Chest,
-        OffSpike,
-        OnSpike
-    }
+        this.data = data;
 
-    public List<Vector2Int> positions;
-    public Dictionary<Vector2Int, HashSet<PuzzleObject>> puzzleObjects = new();
-    public Dictionary<Vector2Int, Dictionary<EntityType, PuzzleEntity>> puzzleEntities = new();
-
-    public Dictionary<PuzzleObject, List<Vector2Int>> objectsByType = new();
-    public Dictionary<EntityType, List<PuzzleEntity>> entitiesByType = new();
-
-    public Puzzle(List<Vector2Int> positions)
-    {
-        this.positions = positions;
-
-        foreach (var position in positions)
+        foreach (var pos in data.positions)
         {
-            puzzleObjects[position] = new();
-            puzzleEntities[position] = new();
+            if (data.puzzleObjects.ContainsKey(pos))
+            {
+                foreach (var obj in data.puzzleObjects[pos])
+                {
+                    if (!objectsByType.ContainsKey(obj)) objectsByType.Add(obj, new() { pos });
+                    else objectsByType[obj].Add(pos);
+                }
+            }
+
+            if (data.puzzleEntities.ContainsKey(pos))
+            {
+                foreach (var (type, entity) in data.puzzleEntities[pos])
+                {
+                    if (!entitiesByType.ContainsKey(type)) entitiesByType.Add(type, new() { entity });
+                    else entitiesByType[type].Add(entity);
+                }
+            }
         }
     }
 
@@ -66,33 +78,6 @@ public class Puzzle
         }
     }
 
-    public void AddObject(Vector2Int position, PuzzleObject puzzleObject)
-    {
-        puzzleObjects[position].Add(puzzleObject);
-        if (!objectsByType.ContainsKey(puzzleObject))
-        {
-            objectsByType.Add(puzzleObject, new() { position });
-        }
-        else
-        {
-            objectsByType[puzzleObject].Add(position);
-        }
-    }
-
-    public void AddEntity<T>(T entity) where T : PuzzleEntity
-    {
-        var type = entity.GetEntityType();
-        puzzleEntities[entity.position].Add(type, entity);
-        if (!entitiesByType.ContainsKey(type))
-        {
-            entitiesByType.Add(type, new() { entity });
-        }
-        else
-        {
-            entitiesByType[type].Add(entity);
-        }
-    }
-
     public PuzzleState GetState()
     {
         var players = GetEntities<PlayerEntity>(EntityType.Player);
@@ -115,7 +100,7 @@ public class Puzzle
 
     public bool IsWon()
     {
-        var players = entitiesByType[EntityType.Player];
+        var players = GetEntities<PlayerEntity>(EntityType.Player);
         foreach (var player in players)
         {
             if (!HasObject(player.position, PuzzleObject.Chest))
@@ -145,110 +130,96 @@ public class Puzzle
         }
     }
 
+    public bool IsValidPosition(Vector2Int position)
+    {
+        return data.positions.Contains(position);
+    }
+
     public bool HasObject(Vector2Int position, PuzzleObject puzzleObject)
     {
-        return puzzleObjects.TryGetValue(position, out var set) && set.Contains(puzzleObject);
+        return data.puzzleObjects.TryGetValue(position, out var set) && set.Contains(puzzleObject);
     }
 
     public bool HasEntity(Vector2Int position, EntityType type, out PuzzleEntity entity)
     {
         entity = null;
-        return puzzleEntities.TryGetValue(position, out var set) && set.TryGetValue(type, out entity);
+        return data.puzzleEntities.TryGetValue(position, out var set) && set.TryGetValue(type, out entity);
+    }
+}
+
+public struct PuzzleState
+{
+    public Vector2Int[] playerPosition;
+    public bool[] buttonStates;
+
+    public override readonly string ToString()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.Append("Puzzle(");
+        for (int i = 0; i < playerPosition.Length; i++)
+        {
+            sb.Append($"Player {i + 1}: {playerPosition[i]}");
+            if (i < playerPosition.Length - 1)
+            {
+                sb.Append(", ");
+            }
+        }
+        for (int i = 0; i < buttonStates.Length; i++)
+        {
+            sb.Append($"Button {i + 1}: {buttonStates[i]}");
+            if (i < buttonStates.Length - 1)
+            {
+                sb.Append(", ");
+            }
+        }
+        sb.Append(")");
+        return sb.ToString();
     }
 
-    public void DebugPrint()
+    public PuzzleState(Vector2Int[] playerPosition, bool[] buttonStates)
     {
-        foreach (var position in positions)
-        {
-            if (HasObject(position, PuzzleObject.Wall))
-            {
-                Debug.Log($"Wall: {position}");
-            }
-            if (HasObject(position, PuzzleObject.Water))
-            {
-                Debug.Log($"Water: {position}");
-            }
-            if (HasObject(position, PuzzleObject.Chest))
-            {
-                Debug.Log($"Chest: {position}");
-            }
-        }
+        this.playerPosition = playerPosition;
+        this.buttonStates = buttonStates;
     }
 
-    public struct PuzzleState
+    public override readonly bool Equals(object obj)
     {
-        public Vector2Int[] playerPosition;
-        public bool[] buttonStates;
-
-        public override readonly string ToString()
+        if (obj is not PuzzleState other)
         {
-            var sb = new System.Text.StringBuilder();
-            sb.Append("Puzzle(");
-            for (int i = 0; i < playerPosition.Length; i++)
-            {
-                sb.Append($"Player {i + 1}: {playerPosition[i]}");
-                if (i < playerPosition.Length - 1)
-                {
-                    sb.Append(", ");
-                }
-            }
-            for (int i = 0; i < buttonStates.Length; i++)
-            {
-                sb.Append($"Button {i + 1}: {buttonStates[i]}");
-                if (i < buttonStates.Length - 1)
-                {
-                    sb.Append(", ");
-                }
-            }
-            sb.Append(")");
-            return sb.ToString();
+            return false;
         }
-
-        public PuzzleState(Vector2Int[] playerPosition, bool[] buttonStates)
+        if (playerPosition.Length != other.playerPosition.Length || buttonStates.Length != other.buttonStates.Length)
         {
-            this.playerPosition = playerPosition;
-            this.buttonStates = buttonStates;
+            return false;
         }
-
-        public override readonly bool Equals(object obj)
+        for (int i = 0; i < playerPosition.Length; i++)
         {
-            if (obj is not PuzzleState other)
+            if (playerPosition[i] != other.playerPosition[i])
             {
                 return false;
             }
-            if (playerPosition.Length != other.playerPosition.Length || buttonStates.Length != other.buttonStates.Length)
+        }
+        for (int i = 0; i < buttonStates.Length; i++)
+        {
+            if (buttonStates[i] != other.buttonStates[i])
             {
                 return false;
             }
-            for (int i = 0; i < playerPosition.Length; i++)
-            {
-                if (playerPosition[i] != other.playerPosition[i])
-                {
-                    return false;
-                }
-            }
-            for (int i = 0; i < buttonStates.Length; i++)
-            {
-                if (buttonStates[i] != other.buttonStates[i])
-                {
-                    return false;
-                }
-            }
-            return true;
         }
+        return true;
+    }
 
-        public override readonly int GetHashCode()
+    public override readonly int GetHashCode()
+    {
+        var hash = new HashCode();
+        foreach (var position in playerPosition)
         {
-            var hash = new HashCode();
-            foreach (var position in playerPosition)
-            {
-                hash.Add(position);
-            }
-            foreach (var buttonState in buttonStates)
-            {
-                hash.Add(buttonState);
-            }
-            return hash.ToHashCode();
+            hash.Add(position);
         }
+        foreach (var buttonState in buttonStates)
+        {
+            hash.Add(buttonState);
+        }
+        return hash.ToHashCode();
     }
 }

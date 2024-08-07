@@ -12,9 +12,47 @@ public class PuzzleEditor : MonoBehaviour
 
     public Mode mode;
 
-    public Level level;
+    public LevelVisuals visuals;
 
     public bool isPlaying;
+
+    private PuzzleData data;
+    private HashSet<Vector2Int> usedPositions;
+
+    private void Awake()
+    {
+        var positions = new HashSet<Vector2Int>();
+
+        var size = new Vector2Int(10, 8);
+
+        for (int x = 0; x < size.x; x++)
+        {
+            for (int y = 0; y < size.y; y++)
+            {
+                positions.Add(new Vector2Int(x, y));
+            }
+        }
+
+        data = new PuzzleData(positions);
+        usedPositions = new HashSet<Vector2Int>();
+        visuals.SetPositions(positions);
+        for (int x = -1; x <= size.x; x++)
+        {
+            for (int y = -1; y <= size.y; y++)
+            {
+                var pos = new Vector2Int(x, y);
+                if (pos.x == -1 || pos.y == -1 || pos.x == size.x || pos.y == size.y)
+                {
+                    visuals.AddWall(pos);
+                }
+            }
+        }
+    }
+
+    public Puzzle BuildPuzzle()
+    {
+        return new Puzzle(data);
+    }
 
     private void Update()
     {
@@ -56,7 +94,11 @@ public class PuzzleEditor : MonoBehaviour
         {
             var position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             position.z = 0;
-            var cellPosition = level.CellPos(position);
+            var cellPosition = visuals.CellPos(position);
+            if (!data.positions.Contains(cellPosition))
+            {
+                return;
+            }
             OnPlace(cellPosition);
         }
     }
@@ -65,31 +107,49 @@ public class PuzzleEditor : MonoBehaviour
     {
         if (mode == Mode.Erase)
         {
-            level.Erase(position);
+            visuals.Remove(position);
+            data.Remove(position);
+            usedPositions.Remove(position);
+            return;
         }
-        else if (mode == Mode.Wall)
+
+        if (usedPositions.Contains(position))
         {
-            level.SetWall(position);
+            return;
+        }
+        usedPositions.Add(position);
+
+        if (mode == Mode.Wall)
+        {
+            visuals.AddWall(position);
+            data.AddObject(position, PuzzleObject.Wall);
         }
         else if (mode == Mode.OnSpike)
         {
-            level.SetSpikes(true, position);
+            visuals.AddOnSpikes(position);
+            data.AddObject(position, PuzzleObject.OnSpike);
         }
         else if (mode == Mode.OffSpike)
         {
-            level.SetSpikes(false, position);
-        }
-        else if (mode == Mode.Button)
-        {
-            level.SetButton(position);
+            visuals.AddOffSpikes(position);
+            data.AddObject(position, PuzzleObject.OffSpike);
         }
         else if (mode == Mode.Chest)
         {
-            level.SetChest(position);
+            visuals.AddChest(position);
+            data.AddObject(position, PuzzleObject.Chest);
+        }
+        else if (mode == Mode.Button)
+        {
+            var button = new ButtonEntity(position);
+            visuals.AddButton(button);
+            data.AddEntity(button);
         }
         else if (mode == Mode.Player)
         {
-            level.SetPlayer(position);
+            var player = new CrabPlayer(position);
+            visuals.AddPlayer(player);
+            data.AddEntity(player);
         }
     }
 }

@@ -1,30 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SocialPlatforms;
-using UnityEngine.Tilemaps;
 
 public class PuzzleReplayer : MonoBehaviour
 {
-    public Level level;
+    public LevelVisuals levelVisuals;
 
-    public Sprite buttonNormalSprite, buttonPressedSprite;
-    public Tile spikeOnTile, spikeOffTile;
-
-    public void ReplayPuzzle(Puzzle puzzle, List<Puzzle.PuzzleState> solution, System.Action callback)
+    public void ReplayPuzzle(Puzzle puzzle, List<PuzzleState> solution, System.Action callback)
     {
         StopAllCoroutines();
         StartCoroutine(ReplayPuzzleCoroutine(puzzle, solution, callback));
     }
 
-    private IEnumerator ReplayPuzzleCoroutine(Puzzle puzzle, List<Puzzle.PuzzleState> actions, System.Action callback)
+    private IEnumerator ReplayPuzzleCoroutine(Puzzle puzzle, List<PuzzleState> actions, System.Action callback)
     {
         Debug.Log("Start Replay: " + actions.Count + " Items");
-        var playersGO = level.GetEntityGameObjects(EntityType.Player);
-        var buttonsGO = level.GetEntityGameObjects(EntityType.Button);
 
         var players = puzzle.GetEntities<PlayerEntity>(EntityType.Player);
         var buttons = puzzle.GetEntities<ButtonEntity>(EntityType.Button);
+        var offSpikes = puzzle.GetObjects(PuzzleObject.OffSpike);
+        var onSpikes = puzzle.GetObjects(PuzzleObject.OnSpike);
 
         foreach (var state in actions)
         {
@@ -38,25 +33,26 @@ public class PuzzleReplayer : MonoBehaviour
         callback?.Invoke();
 
 
-        void SetState(Puzzle.PuzzleState state)
+        void SetState(PuzzleState state)
         {
             puzzle.SetState(state);
-            for (int i = 0; i < playersGO.Count; i++)
+            foreach (var player in players)
             {
-                playersGO[i].transform.position = level.WorldPos(players[i].position);
+                levelVisuals.UpdatePlayerPosition(player);
             }
-            for (int i = 0; i < buttonsGO.Count; i++)
+            foreach (var button in buttons)
             {
-                buttonsGO[i].GetComponent<SpriteRenderer>().sprite = buttons[i].isPressed ? buttonPressedSprite : buttonNormalSprite;
+                levelVisuals.UpdateButtonState(button);
             }
+
             var buttonState = puzzle.GetButtonToggleState();
-            foreach (var spike in puzzle.GetObjects(Puzzle.PuzzleObject.OffSpike))
+            foreach (var pos in offSpikes)
             {
-                level.objectTilemap.SetTile((Vector3Int)spike, buttonState ? spikeOnTile : spikeOffTile);
+                levelVisuals.UpdateOffSpikeTile(pos, buttonState);
             }
-            foreach (var spike in puzzle.GetObjects(Puzzle.PuzzleObject.OnSpike))
+            foreach (var pos in onSpikes)
             {
-                level.objectTilemap.SetTile((Vector3Int)spike, buttonState ? spikeOffTile : spikeOnTile);
+                levelVisuals.UpdateOnSpikeTile(pos, buttonState);
             }
         }
     }

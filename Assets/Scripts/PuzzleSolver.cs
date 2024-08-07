@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class PuzzleSolver
 {
-    public List<Puzzle.PuzzleState> Solve(Puzzle puzzle)
+    public List<PuzzleState> Solve(Puzzle puzzle)
     {
         var logic = new PuzzleLogic(puzzle);
         var initialState = puzzle.GetState();
 
-        var queue = new Queue<List<Puzzle.PuzzleState>>();
+        var queue = new Queue<List<PuzzleState>>();
         queue.Enqueue(new() { initialState });
-        var visited = new HashSet<Puzzle.PuzzleState>();
+        var visited = new HashSet<PuzzleState>();
 
 
         while (queue.Count > 0)
@@ -30,7 +30,7 @@ public class PuzzleSolver
 
             foreach (var state in logic.GetNextStates(curState))
             {
-                var newMoveList = new List<Puzzle.PuzzleState>(moveList) { state };
+                var newMoveList = new List<PuzzleState>(moveList) { state };
                 puzzle.SetState(state);
                 if (puzzle.IsWon())
                 {

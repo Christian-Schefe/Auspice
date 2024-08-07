@@ -1,9 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Yeast;
 
 public abstract class PlayerEntity : PuzzleEntity
 {
+    public Vector2Int originalPosition;
+
+    public PlayerEntity() : this(Vector2Int.zero)
+    {
+        originalPosition = Vector2Int.zero;
+    }
+
+    public PlayerEntity(Vector2Int position) : base(position)
+    {
+        originalPosition = position;
+    }
+
     public abstract List<Vector2Int> GetMovePositions(Puzzle puzzle);
     public override EntityType GetEntityType()
     {
@@ -11,12 +24,13 @@ public abstract class PlayerEntity : PuzzleEntity
     }
 }
 
+[IsDerivedClass("CrabPlayer")]
 public class CrabPlayer : PlayerEntity
 {
-    public CrabPlayer(Vector2Int position)
-    {
-        this.position = position;
-    }
+
+    public CrabPlayer() : this(Vector2Int.zero) { }
+
+    public CrabPlayer(Vector2Int position) : base(position) { }
 
     public override List<Vector2Int> GetMovePositions(Puzzle puzzle)
     {
@@ -36,19 +50,5 @@ public class CrabPlayer : PlayerEntity
             movePositions.Add(movePosition);
         }
         return movePositions;
-    }
-
-    public override bool Equals(object obj)
-    {
-        if (obj is not CrabPlayer other)
-        {
-            return false;
-        }
-        return position == other.position;
-    }
-
-    public override int GetHashCode()
-    {
-        return position.GetHashCode();
     }
 }
