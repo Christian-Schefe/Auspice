@@ -28,8 +28,6 @@ public class PuzzleSolver
                 break;
             }
 
-            Debug.Log("state: " + curState);
-
             foreach (var state in logic.GetNextStates(curState))
             {
                 var newMoveList = new List<Puzzle.PuzzleState>(moveList) { state };

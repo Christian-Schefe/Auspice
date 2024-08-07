@@ -2,12 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Player : PuzzleEntity
+public abstract class PlayerEntity : PuzzleEntity
 {
     public abstract List<Vector2Int> GetMovePositions(Puzzle puzzle);
+    public override EntityType GetEntityType()
+    {
+        return EntityType.Player;
+    }
 }
 
-public class CrabPlayer : Player
+public class CrabPlayer : PlayerEntity
 {
     public CrabPlayer(Vector2Int position)
     {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Puzzle
@@ -15,96 +16,88 @@ public class Puzzle
     }
 
     public List<Vector2Int> positions;
-    public Dictionary<Vector2Int, HashSet<PuzzleObject>> puzzleObjects;
-    public Dictionary<Vector2Int, Dictionary<Type, PuzzleEntity>> puzzleEntities;
+    public Dictionary<Vector2Int, HashSet<PuzzleObject>> puzzleObjects = new();
+    public Dictionary<Vector2Int, Dictionary<EntityType, PuzzleEntity>> puzzleEntities = new();
 
-    public List<Player> players;
-    public List<ButtonEntity> buttons;
-
-    public bool GetButtonToggleState()
-    {
-        int pressedButtonCount = 0;
-        for (int i = 0; i < buttons.Count; i++)
-        {
-            if (buttons[i].isPressed) pressedButtonCount++;
-        }
-        return pressedButtonCount % 2 == 1;
-    }
+    public Dictionary<PuzzleObject, List<Vector2Int>> objectsByType = new();
+    public Dictionary<EntityType, List<PuzzleEntity>> entitiesByType = new();
 
     public Puzzle(List<Vector2Int> positions)
     {
         this.positions = positions;
 
-        puzzleObjects = new();
-        puzzleEntities = new();
         foreach (var position in positions)
         {
             puzzleObjects[position] = new();
             puzzleEntities[position] = new();
         }
+    }
 
-        players = new();
-        buttons = new();
+    public bool GetButtonToggleState()
+    {
+        int pressedButtonCount = 0;
+        var buttons = GetEntities<ButtonEntity>(EntityType.Button);
+        for (int i = 0; i < buttons.Count; i++)
+        {
+            var button = buttons[i];
+            if (button.isPressed) pressedButtonCount++;
+        }
+        return pressedButtonCount % 2 == 1;
+    }
+
+    public List<T> GetEntities<T>(EntityType type) where T : PuzzleEntity
+    {
+        if (!entitiesByType.ContainsKey(type))
+        {
+            return new();
+        }
+        return entitiesByType[type].Cast<T>().ToList();
+    }
+
+    public List<Vector2Int> GetObjects(PuzzleObject puzzleObject)
+    {
+        if (objectsByType.TryGetValue(puzzleObject, out var positions))
+        {
+            return positions;
+        }
+        else
+        {
+            return new();
+        }
     }
 
     public void AddObject(Vector2Int position, PuzzleObject puzzleObject)
     {
         puzzleObjects[position].Add(puzzleObject);
-    }
-
-    public void RemoveObject(Vector2Int position, PuzzleObject puzzleObject)
-    {
-        puzzleObjects[position].Remove(puzzleObject);
-    }
-    public void RemoveObjects(Vector2Int position)
-    {
-        puzzleObjects[position].Clear();
+        if (!objectsByType.ContainsKey(puzzleObject))
+        {
+            objectsByType.Add(puzzleObject, new() { position });
+        }
+        else
+        {
+            objectsByType[puzzleObject].Add(position);
+        }
     }
 
     public void AddEntity<T>(T entity) where T : PuzzleEntity
     {
-        puzzleEntities[entity.position].Add(typeof(T), entity);
-        if (entity is Player player)
+        var type = entity.GetEntityType();
+        puzzleEntities[entity.position].Add(type, entity);
+        if (!entitiesByType.ContainsKey(type))
         {
-            players.Add(player);
+            entitiesByType.Add(type, new() { entity });
         }
-        else if (entity is ButtonEntity button)
+        else
         {
-            buttons.Add(button);
+            entitiesByType[type].Add(entity);
         }
-    }
-
-    public void RemoveEntity<T>(Vector2Int position) where T : PuzzleEntity
-    {
-        if (!puzzleEntities[position].Remove(typeof(T), out var entity)) return;
-        if (entity is Player player)
-        {
-            players.Remove(player);
-        }
-        else if (entity is ButtonEntity button)
-        {
-            buttons.Remove(button);
-        }
-    }
-
-    public void RemoveEntities(Vector2Int position)
-    {
-        foreach (var entity in puzzleEntities[position].Values)
-        {
-            if (entity is Player player)
-            {
-                players.Remove(player);
-            }
-            else if (entity is ButtonEntity button)
-            {
-                buttons.Remove(button);
-            }
-        }
-        puzzleEntities[position].Clear();
     }
 
     public PuzzleState GetState()
     {
+        var players = GetEntities<PlayerEntity>(EntityType.Player);
+        var buttons = GetEntities<ButtonEntity>(EntityType.Button);
+
         var playerPosition = new Vector2Int[players.Count];
         for (int i = 0; i < players.Count; i++)
         {
@@ -122,6 +115,7 @@ public class Puzzle
 
     public bool IsWon()
     {
+        var players = entitiesByType[EntityType.Player];
         foreach (var player in players)
         {
             if (!HasObject(player.position, PuzzleObject.Chest))
@@ -134,6 +128,9 @@ public class Puzzle
 
     public void SetState(PuzzleState state)
     {
+        var players = GetEntities<PlayerEntity>(EntityType.Player);
+        var buttons = GetEntities<ButtonEntity>(EntityType.Button);
+
         for (int i = 0; i < players.Count; i++)
         {
             players[i].position = state.playerPosition[i];
@@ -142,8 +139,9 @@ public class Puzzle
         int pressedButtonCount = 0;
         for (int i = 0; i < buttons.Count; i++)
         {
-            buttons[i].isPressed = state.buttonStates[i];
-            if (buttons[i].isPressed) pressedButtonCount++;
+            var button = buttons[i];
+            button.isPressed = state.buttonStates[i];
+            if (button.isPressed) pressedButtonCount++;
         }
     }
 
@@ -152,15 +150,10 @@ public class Puzzle
         return puzzleObjects.TryGetValue(position, out var set) && set.Contains(puzzleObject);
     }
 
-    public bool HasEntity<T>(Vector2Int position, out T entity) where T : PuzzleEntity
+    public bool HasEntity(Vector2Int position, EntityType type, out PuzzleEntity entity)
     {
-        if (puzzleEntities.TryGetValue(position, out var set) && set.TryGetValue(typeof(T), out var puzzleEntity))
-        {
-            entity = (T)puzzleEntity;
-            return true;
-        }
         entity = null;
-        return false;
+        return puzzleEntities.TryGetValue(position, out var set) && set.TryGetValue(type, out entity);
     }
 
     public void DebugPrint()

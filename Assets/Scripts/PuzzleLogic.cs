@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
 public class PuzzleLogic
 {
@@ -18,9 +16,10 @@ public class PuzzleLogic
         puzzle.SetState(state);
 
         var moves = new List<List<Vector2Int>>();
-        for (int i = 0; i < puzzle.players.Count; i++)
+        var players = puzzle.GetEntities<PlayerEntity>(EntityType.Player);
+        for (int i = 0; i < players.Count; i++)
         {
-            var playerMoves = puzzle.players[i].GetMovePositions(puzzle);
+            var playerMoves = players[i].GetMovePositions(puzzle);
             moves.Add(playerMoves);
         }
 
@@ -45,7 +44,8 @@ public class PuzzleLogic
 
         var usedPositions = new HashSet<Vector2Int>();
         puzzle.SetState(state);
-        for (int i = 0; i < puzzle.players.Count; i++)
+        var players = puzzle.GetEntities<PlayerEntity>(EntityType.Player);
+        for (int i = 0; i < players.Count; i++)
         {
             if (usedPositions.Contains(to[i]))
             {
@@ -56,19 +56,20 @@ public class PuzzleLogic
                 return false;
             }
 
-            var oldPos = puzzle.players[i].position;
+            var oldPos = players[i].position;
             usedPositions.Add(to[i]);
-            puzzle.players[i].position = to[i];
+            players[i].position = to[i];
 
-            if (oldPos != to[i] && puzzle.HasEntity(to[i], out ButtonEntity button))
+            if (oldPos != to[i] && puzzle.HasEntity(to[i], EntityType.Button, out var buttonEntity))
             {
+                var button = (ButtonEntity)buttonEntity;
                 button.isPressed = !button.isPressed;
             }
         }
 
         bool buttonToggleState = puzzle.GetButtonToggleState();
 
-        for (int i = 0; i < puzzle.players.Count; i++)
+        for (int i = 0; i < players.Count; i++)
         {
             if (!buttonToggleState && puzzle.HasObject(to[i], Puzzle.PuzzleObject.OnSpike))
             {

@@ -14,8 +14,15 @@ public class PuzzleEditor : MonoBehaviour
 
     public Level level;
 
+    public bool isPlaying;
+
     private void Update()
     {
+        if (isPlaying)
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             mode = Mode.Erase;
