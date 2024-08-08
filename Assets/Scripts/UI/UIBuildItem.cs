@@ -19,8 +19,9 @@ public class UIBuildItem : MonoBehaviour, IPointerClickHandler
         onClick?.Invoke();
     }
 
-    public void UpdateData(UIBuildMenu.BuildItemData data)
+    public void UpdateData(UIBuildMenu.BuildItemData data, bool displayNumber = true)
     {
+        numberText.enabled = displayNumber;
         numberText.text = data.number?.ToString() ?? "\u221E";
         iconImage.sprite = data.icon;
         onClick = data.select;

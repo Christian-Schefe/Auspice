@@ -60,6 +60,7 @@ public class PuzzleLogic
             usedPositions.Add(to[i]);
             players[i].position = to[i];
 
+
             if (oldPos != to[i] && puzzle.HasEntity(to[i], PuzzleEntityType.Button, out var buttonEntity))
             {
                 var button = (ButtonEntity)buttonEntity;
@@ -67,17 +68,17 @@ public class PuzzleLogic
             }
         }
 
-        bool buttonToggleState = puzzle.GetButtonToggleState();
-
         for (int i = 0; i < players.Count; i++)
         {
-            if (!buttonToggleState && puzzle.HasObject(to[i], PuzzleEntityType.OnSpike))
+            if (puzzle.HasEntity(to[i], PuzzleEntityType.Spike, out var spike))
             {
-                return false;
-            }
-            else if (buttonToggleState && puzzle.HasObject(to[i], PuzzleEntityType.OffSpike))
-            {
-                return false;
+                var type = spike.GetEntityType();
+                bool buttonToggleState = puzzle.GetButtonToggleState(type.buttonColor);
+
+                if (type.spikeInitialState != buttonToggleState)
+                {
+                    return false;
+                }
             }
         }
 
@@ -91,11 +92,7 @@ public class PuzzleLogic
         {
             return false;
         }
-        if (puzzle.HasObject(pos, PuzzleEntityType.Wall))
-        {
-            return false;
-        }
-        if (puzzle.HasObject(pos, PuzzleEntityType.Water))
+        if (puzzle.HasEntity(pos, PuzzleEntityType.Wall))
         {
             return false;
         }

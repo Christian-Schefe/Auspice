@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: edcfd662baebd5f4a948138d4244bfb2, type: 3}
   m_Name: LevelGenerator
   m_EditorClassIdentifier: 
-  size: {x: 10, y: 7}
+  size: {x: 13, y: 9}
   levelName: level1
+  starThresholds: 0a000000140000001e000000

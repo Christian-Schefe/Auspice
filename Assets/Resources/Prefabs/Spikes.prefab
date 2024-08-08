@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 8936617129266793510}
   - component: {fileID: 2552308676119244779}
-  - component: {fileID: 2161879236524441779}
+  - component: {fileID: 5972091060481664367}
   m_Layer: 0
-  m_Name: Button
+  m_Name: Spikes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -74,7 +74,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
-  m_Sprite: {fileID: -366742648, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
+  m_Sprite: {fileID: -1270377434, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -85,7 +85,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &2161879236524441779
+--- !u!114 &5972091060481664367
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -94,14 +94,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 8025678030024240444}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ba787e78ed0e5694689479a9fa8c794d, type: 3}
+  m_Script: {fileID: 11500000, guid: 7c8c01a0439fe594a90fd42878d68189, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   spriteRenderer: {fileID: 2552308676119244779}
   sprites:
   - color: 0
-    pressedSprite: {fileID: -2061729499, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
-    notPressedSprite: {fileID: -366742648, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
+    onSprite: {fileID: -1270377434, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
+    offSprite: {fileID: -394579013, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
   - color: 1
-    pressedSprite: {fileID: 441154317, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
-    notPressedSprite: {fileID: 1052373530, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
+    onSprite: {fileID: -1849667699, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
+    offSprite: {fileID: -519478516, guid: 3257363a752140b489c8365ac8d714d5, type: 3}

@@ -1,44 +1,47 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class UIBuildMenu : MonoBehaviour
 {
     public RectTransform layoutGroup;
+    public PuzzleEditor editor;
     public UIBuildItem buildItemPrefab;
-    public List<Sprite> iconSprites;
+    public List<IconMapEntry> iconSprites;
 
-    private readonly Dictionary<PuzzleEntityType, (BuildItemData, UIBuildItem)> entityData = new();
+    private readonly Dictionary<EntityType, (BuildItemData, UIBuildItem)> entityData = new();
     private UIBuildItem eraserItem;
     private UIBuildItem selectedItem;
 
-    public void SetData(Dictionary<PuzzleEntityType, int?> editableEntities, System.Action onSelectErase, System.Action<PuzzleEntityType> onSelectObject)
+    public void SetData(Dictionary<EntityType, int?> editableEntities)
     {
         var selectErase = new System.Action(() =>
         {
-            onSelectErase();
+            editor.SetSelectedType(new(PuzzleEntityType.None));
             selectedItem.SetSelected(false);
             selectedItem = eraserItem;
             selectedItem.SetSelected(true);
         });
 
-        var eraserData = new BuildItemData(null, iconSprites[0], selectErase);
+        var eraserData = new BuildItemData(null, iconSprites.Find(e => e.type.basicType == PuzzleEntityType.None).icon, selectErase);
         eraserItem = Instantiate(buildItemPrefab, layoutGroup);
-        eraserItem.UpdateData(eraserData);
+        eraserItem.UpdateData(eraserData, false);
         eraserItem.SetSelected(true);
         selectedItem = eraserItem;
 
         foreach (var pair in editableEntities)
         {
+            Debug.Log("Pair: " + pair);
             var key = pair.Key;
             var onSelect = new System.Action(() =>
             {
-                onSelectObject(key);
+                editor.SetSelectedType(key);
                 selectedItem.SetSelected(false);
                 selectedItem = entityData[key].Item2;
                 selectedItem.SetSelected(true);
             });
-            var data = new BuildItemData(pair.Value, iconSprites[(int)key], onSelect);
+            var data = new BuildItemData(pair.Value, iconSprites.Find(e => e.type == key).icon, onSelect);
             var item = Instantiate(buildItemPrefab, layoutGroup);
             entityData[key] = (data, item);
             item.UpdateData(data);
@@ -47,20 +50,27 @@ public class UIBuildMenu : MonoBehaviour
         }
     }
 
-    public bool TryConsumeEntity(PuzzleEntityType type)
+    public bool CanConsumeEntity(EntityType type)
     {
         if (entityData.TryGetValue(type, out var data))
         {
-            if (data.Item1.number == 0) return false;
-            if (data.Item1.number != null) data.Item1.number--;
-            data.Item2.UpdateData(data.Item1);
-            return true;
+            return data.Item1.number != 0;
         }
 
         return false;
     }
 
-    public void ReturnEntity(PuzzleEntityType type)
+    public void ConsumeEntity(EntityType type)
+    {
+        if (entityData.TryGetValue(type, out var data))
+        {
+            if (data.Item1.number == 0) throw new System.InvalidOperationException();
+            if (data.Item1.number != null) data.Item1.number--;
+            data.Item2.UpdateData(data.Item1);
+        }
+    }
+
+    public void ReturnEntity(EntityType type)
     {
         if (entityData.TryGetValue(type, out var data))
         {
@@ -82,6 +92,19 @@ public class UIBuildMenu : MonoBehaviour
             this.number = number;
             this.icon = icon;
             this.select = select;
+        }
+    }
+
+    [System.Serializable]
+    public class IconMapEntry
+    {
+        public EntityType type;
+        public Sprite icon;
+
+        public IconMapEntry(EntityType type, Sprite icon)
+        {
+            this.type = type;
+            this.icon = icon;
         }
     }
 }

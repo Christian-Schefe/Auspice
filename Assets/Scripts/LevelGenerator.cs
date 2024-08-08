@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Yeast.Json;
+using Yeast;
 
 [CreateAssetMenu(fileName = "LevelGenerator", menuName = "LevelGenerator")]
 public class LevelGenerator : ScriptableObject
 {
     public Vector2Int size;
     public string levelName;
+    public List<int> starThresholds;
 
     [ContextMenu("Generate")]
     public void Generate()
@@ -29,26 +30,31 @@ public class LevelGenerator : ScriptableObject
         {
             if (position.x == 0 || position.x == size.x - 1 || position.y == 0 || position.y == size.y - 1)
             {
-                data.TryAddEntity(new GenericEntity(position, PuzzleEntityType.Wall), isEditable: false);
+                data.TryAddEntity(new GenericEntity(position, new EntityType(PuzzleEntityType.Wall)), isEditable: false);
             }
         }
 
-        data.editableEntities = new Dictionary<PuzzleEntityType, int?>
+        data.editableEntities = new Dictionary<EntityType, int?>
         {
-            { PuzzleEntityType.Wall, null },
-            { PuzzleEntityType.OnSpike, null },
-            { PuzzleEntityType.OffSpike, null },
-            { PuzzleEntityType.Chest, null },
-            { PuzzleEntityType.Button, null },
-            { PuzzleEntityType.Player, null }
+            { new EntityType(PuzzleEntityType.Wall), null },
+            { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Red, spikeInitialState:true), null },
+            { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Red, spikeInitialState:false), null },
+            { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Blue, spikeInitialState:true), null },
+            { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Blue, spikeInitialState:false), null },
+            { new EntityType(PuzzleEntityType.Chest), null },
+            { new EntityType(PuzzleEntityType.Button, buttonColor: ButtonColor.Red), null },
+            { new EntityType(PuzzleEntityType.Button, buttonColor: ButtonColor.Blue), null },
+            { new EntityType(PuzzleEntityType.Player, playerType: PlayerType.Crab), null }
         };
 
-        var json = JSON.Stringify(data);
+        data.starTresholds = starThresholds;
+
+        var json = data.ToJson();
         WriteTextAsset(json);
 
         //test roundtrip
-        var parsedData = JSON.Parse<PuzzleData>(json);
-        var roundtripJson = JSON.Stringify(parsedData);
+        var parsedData = json.FromJson<PuzzleData>();
+        var roundtripJson = parsedData.ToJson();
         Debug.Log(json == roundtripJson);
     }
 

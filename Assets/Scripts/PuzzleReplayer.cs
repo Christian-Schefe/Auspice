@@ -6,31 +6,36 @@ public class PuzzleReplayer : MonoBehaviour
 {
     public LevelVisuals levelVisuals;
 
-    public void ReplayPuzzle(Puzzle puzzle, List<PuzzleState> solution, System.Action callback)
+    public System.Action<int> stepCallback;
+    public System.Action endCallback;
+
+    public void ReplayPuzzle(Puzzle puzzle, List<PuzzleState> solution)
     {
         StopAllCoroutines();
-        StartCoroutine(ReplayPuzzleCoroutine(puzzle, solution, callback));
+        StartCoroutine(ReplayPuzzleCoroutine(puzzle, solution));
     }
 
-    private IEnumerator ReplayPuzzleCoroutine(Puzzle puzzle, List<PuzzleState> actions, System.Action callback)
+    private IEnumerator ReplayPuzzleCoroutine(Puzzle puzzle, List<PuzzleState> actions)
     {
         Debug.Log("Start Replay: " + actions.Count + " Items");
 
         var players = puzzle.GetEntities<PlayerEntity>(PuzzleEntityType.Player);
         var buttons = puzzle.GetEntities<ButtonEntity>(PuzzleEntityType.Button);
-        var offSpikes = puzzle.GetEntities<GenericEntity>(PuzzleEntityType.OffSpike);
-        var onSpikes = puzzle.GetEntities<GenericEntity>(PuzzleEntityType.OnSpike);
+        var spikes = puzzle.GetEntities<GenericEntity>(PuzzleEntityType.Spike);
 
-        foreach (var state in actions)
+        for (int i = 0; i < actions.Count; i++)
         {
+            var state = actions[i];
             Debug.Log("Replaying: " + state);
             SetState(state);
+            stepCallback?.Invoke(i);
             yield return new WaitForSeconds(0.2f);
         }
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.8f);
         SetState(actions[0]);
-        callback?.Invoke();
+        yield return new WaitForSeconds(0.2f);
+        endCallback?.Invoke();
 
 
         void SetState(PuzzleState state)
@@ -45,14 +50,10 @@ public class PuzzleReplayer : MonoBehaviour
                 levelVisuals.UpdateButtonState(button);
             }
 
-            var buttonState = puzzle.GetButtonToggleState();
-            foreach (var spike in offSpikes)
+            foreach (var spike in spikes)
             {
-                levelVisuals.UpdateOffSpikeTile(spike.position, buttonState);
-            }
-            foreach (var spike in onSpikes)
-            {
-                levelVisuals.UpdateOnSpikeTile(spike.position, buttonState);
+                var buttonState = puzzle.GetButtonToggleState(spike.GetEntityType().buttonColor);
+                levelVisuals.UpdateSpikeState(spike, buttonState);
             }
         }
     }

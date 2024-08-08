@@ -7,12 +7,12 @@ public abstract class PlayerEntity : PuzzleEntity
 {
     public Vector2Int originalPosition;
 
-    public PlayerEntity() : this(Vector2Int.zero)
+    public PlayerEntity() : this(Vector2Int.zero, PlayerType.Crab)
     {
         originalPosition = Vector2Int.zero;
     }
 
-    public PlayerEntity(Vector2Int position) : base(position, PuzzleEntityType.Player)
+    public PlayerEntity(Vector2Int position, PlayerType playerType) : base(position, new EntityType(PuzzleEntityType.Player, playerType: playerType))
     {
         originalPosition = position;
     }
@@ -23,10 +23,9 @@ public abstract class PlayerEntity : PuzzleEntity
 [IsDerivedClass("CrabPlayer")]
 public class CrabPlayer : PlayerEntity
 {
-
     public CrabPlayer() : this(Vector2Int.zero) { }
 
-    public CrabPlayer(Vector2Int position) : base(position) { }
+    public CrabPlayer(Vector2Int position) : base(position, PlayerType.Crab) { }
 
     public override List<Vector2Int> GetMovePositions(Puzzle puzzle)
     {

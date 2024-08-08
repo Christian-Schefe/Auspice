@@ -5,20 +5,16 @@ using Yeast.Json;
 
 public class PuzzleEditor : MonoBehaviour
 {
-    public enum Mode
-    {
-        Erase, Wall, Button, Chest, Player, OnSpike, OffSpike
-    }
-
     public TextAsset levelData;
-
-
-    public Mode mode;
 
     public LevelVisuals visuals;
     public UIBuildMenu buildMenu;
+    public UIRunMenu runMenu;
+    public PuzzleReplayer replayer;
 
-    public bool isPlaying;
+    private EntityType selectedType;
+
+    private bool isReplaying;
 
     private PuzzleData data;
     private HashSet<Vector2Int> usedPositions;
@@ -30,27 +26,30 @@ public class PuzzleEditor : MonoBehaviour
         usedPositions = new HashSet<Vector2Int>(data.entities.Keys);
         visuals.SetData(data);
 
-        buildMenu.SetData(data.editableEntities, OnSelectErase, OnSelectEntity);
+        buildMenu.SetData(data.editableEntities);
+        runMenu.SetStepBounds(data.starTresholds);
     }
 
-    private void OnSelectEntity(PuzzleEntityType type)
+    public void SetSelectedType(EntityType type)
     {
-        mode = type switch
+        selectedType = type;
+    }
+
+    public void PlaybackSolution(Puzzle puzzle, List<PuzzleState> solution)
+    {
+        isReplaying = true;
+        replayer.endCallback = () =>
         {
-            PuzzleEntityType.Wall => Mode.Wall,
-            PuzzleEntityType.OnSpike => Mode.OnSpike,
-            PuzzleEntityType.OffSpike => Mode.OffSpike,
-            PuzzleEntityType.Chest => Mode.Chest,
-            PuzzleEntityType.Button => Mode.Button,
-            PuzzleEntityType.Player => Mode.Player,
-            _ => mode
+            isReplaying = false;
         };
+        replayer.stepCallback = (step) =>
+        {
+            runMenu.SetSteps(step);
+        };
+        replayer.ReplayPuzzle(puzzle, solution);
     }
 
-    private void OnSelectErase()
-    {
-        mode = Mode.Erase;
-    }
+    public bool IsReplaying() => isReplaying;
 
     public Puzzle BuildPuzzle()
     {
@@ -59,60 +58,36 @@ public class PuzzleEditor : MonoBehaviour
 
     private void Update()
     {
-        if (isPlaying)
+        if (isReplaying)
         {
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            mode = Mode.Erase;
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            mode = Mode.Wall;
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            mode = Mode.Button;
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            mode = Mode.Chest;
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha5))
-        {
-            mode = Mode.Player;
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha6))
-        {
-            mode = Mode.OnSpike;
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha7))
-        {
-            mode = Mode.OffSpike;
-        }
+        var cellPosition = visuals.MouseCellPos();
+        if (!data.positions.Contains(cellPosition)) return;
 
         if (Input.GetMouseButton(0))
         {
-            var position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            position.z = 0;
-            var cellPosition = visuals.CellPos(position);
-            if (!data.positions.Contains(cellPosition))
-            {
-                return;
-            }
             OnPlace(cellPosition);
+        }
+        else if (Input.GetMouseButton(1))
+        {
+            var oldType = selectedType;
+            selectedType = new(PuzzleEntityType.None);
+            OnPlace(cellPosition);
+            selectedType = oldType;
         }
     }
 
     private void OnPlace(Vector2Int position)
     {
-        if (mode == Mode.Erase)
+        if (selectedType.basicType == PuzzleEntityType.None)
         {
-            visuals.Remove(position);
             var removedEntities = data.Remove(position);
-            if (removedEntities.Count > 0) usedPositions.Remove(position);
+            if (removedEntities.Count == 0) return;
+
+            visuals.Remove(position);
+            usedPositions.Remove(position);
 
             foreach (var entity in removedEntities)
             {
@@ -126,46 +101,41 @@ public class PuzzleEditor : MonoBehaviour
             return;
         }
 
-        Debug.Log($"Placing {mode} at {position}");
-        if (mode == Mode.Wall)
+        if (!buildMenu.CanConsumeEntity(selectedType)) return;
+
+        if (selectedType.basicType == PuzzleEntityType.Wall)
         {
-            if (!buildMenu.TryConsumeEntity(PuzzleEntityType.Wall)) return;
-            if (!data.TryAddEntity(new GenericEntity(position, PuzzleEntityType.Wall))) return;
-            visuals.AddWall(position);
+            var wall = new GenericEntity(position, selectedType);
+            if (!data.TryAddEntity(wall)) return;
+            visuals.AddWall(wall);
         }
-        else if (mode == Mode.OnSpike)
+        else if (selectedType.basicType == PuzzleEntityType.Spike)
         {
-            if (!buildMenu.TryConsumeEntity(PuzzleEntityType.OnSpike)) return;
-            if (!data.TryAddEntity(new GenericEntity(position, PuzzleEntityType.OnSpike))) return;
-            visuals.AddOnSpikes(position);
+            var spike = new GenericEntity(position, selectedType);
+            if (!data.TryAddEntity(spike)) return;
+            visuals.AddSpikes(spike);
         }
-        else if (mode == Mode.OffSpike)
+        else if (selectedType.basicType == PuzzleEntityType.Chest)
         {
-            if (!buildMenu.TryConsumeEntity(PuzzleEntityType.OffSpike)) return;
-            if (!data.TryAddEntity(new GenericEntity(position, PuzzleEntityType.OffSpike))) return;
-            visuals.AddOffSpikes(position);
+            var chest = new GenericEntity(position, selectedType);
+            if (!data.TryAddEntity(chest)) return;
+            visuals.AddChest(chest);
         }
-        else if (mode == Mode.Chest)
+        else if (selectedType.basicType == PuzzleEntityType.Button)
         {
-            if (!buildMenu.TryConsumeEntity(PuzzleEntityType.Chest)) return;
-            if (!data.TryAddEntity(new GenericEntity(position, PuzzleEntityType.Chest))) return;
-            visuals.AddChest(position);
-        }
-        else if (mode == Mode.Button)
-        {
-            if (!buildMenu.TryConsumeEntity(PuzzleEntityType.Button)) return;
-            var button = new ButtonEntity(position);
+            var button = new ButtonEntity(selectedType.buttonColor, position);
             if (!data.TryAddEntity(button)) return;
             visuals.AddButton(button);
         }
-        else if (mode == Mode.Player)
+        else if (selectedType.basicType == PuzzleEntityType.Player)
         {
-            if (!buildMenu.TryConsumeEntity(PuzzleEntityType.Player)) return;
             var player = new CrabPlayer(position);
             if (!data.TryAddEntity(player)) return;
             visuals.AddPlayer(player);
         }
 
+        Debug.Log($"Placed {selectedType} at {position}");
         usedPositions.Add(position);
+        buildMenu.ConsumeEntity(selectedType);
     }
 }

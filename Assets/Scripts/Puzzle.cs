@@ -1,26 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-
-public enum PuzzleEntityType
-{
-    None,
-    Wall,
-    Water,
-    Chest,
-    OffSpike,
-    OnSpike,
-    Button,
-    Player,
-}
 
 public class Puzzle
 {
-    public HashSet<Vector2Int> positions;
-    public Dictionary<Vector2Int, Dictionary<PuzzleEntityType, PuzzleEntity>> entities = new();
-
+    private readonly HashSet<Vector2Int> positions;
+    private readonly Dictionary<Vector2Int, Dictionary<PuzzleEntityType, PuzzleEntity>> entitiesByPosition = new();
     private readonly Dictionary<PuzzleEntityType, List<PuzzleEntity>> entitiesByType = new();
+    private readonly Dictionary<PuzzleEntity, Vector2Int> storedEntityPosition = new();
+    private readonly Dictionary<ButtonColor, bool> buttonStates = new();
 
     public Puzzle(PuzzleData data)
     {
@@ -30,29 +18,28 @@ public class Puzzle
         {
             if (data.entities.ContainsKey(pos))
             {
-                entities.Add(pos, new());
+                entitiesByPosition.Add(pos, new());
 
                 foreach (var (type, (entity, _)) in data.entities[pos])
                 {
-                    if (!entitiesByType.ContainsKey(type)) entitiesByType.Add(type, new() { entity });
-                    else entitiesByType[type].Add(entity);
+                    if (!entitiesByType.ContainsKey(type.basicType)) entitiesByType.Add(type.basicType, new() { entity });
+                    else entitiesByType[type.basicType].Add(entity);
 
-                    entities[pos].Add(type, entity);
+                    entitiesByPosition[pos].Add(type.basicType, entity);
+                    storedEntityPosition.Add(entity, pos);
                 }
             }
         }
+
+        foreach (var buttonColor in ButtonEntity.buttonColors)
+        {
+            buttonStates.Add(buttonColor, false);
+        }
     }
 
-    public bool GetButtonToggleState()
+    public bool GetButtonToggleState(ButtonColor color)
     {
-        int pressedButtonCount = 0;
-        var buttons = GetEntities<ButtonEntity>(PuzzleEntityType.Button);
-        for (int i = 0; i < buttons.Count; i++)
-        {
-            var button = buttons[i];
-            if (button.isPressed) pressedButtonCount++;
-        }
-        return pressedButtonCount % 2 == 1;
+        return buttonStates[color];
     }
 
     public List<Vector2Int> GetEntityPositions(PuzzleEntityType type)
@@ -108,7 +95,7 @@ public class Puzzle
         var players = GetEntities<PlayerEntity>(PuzzleEntityType.Player);
         foreach (var player in players)
         {
-            if (!HasObject(player.position, PuzzleEntityType.Chest))
+            if (!HasEntity(player.position, PuzzleEntityType.Chest))
             {
                 return false;
             }
@@ -123,15 +110,31 @@ public class Puzzle
 
         for (int i = 0; i < players.Count; i++)
         {
-            players[i].position = state.playerPosition[i];
+            var player = players[i];
+            player.position = state.playerPosition[i];
+            UpdateEntityPosition(player);
         }
 
-        int pressedButtonCount = 0;
+        var buttonPressCounts = new Dictionary<ButtonColor, int>();
+        foreach (var buttonColor in ButtonEntity.buttonColors)
+        {
+            buttonPressCounts.Add(buttonColor, 0);
+        }
+
         for (int i = 0; i < buttons.Count; i++)
         {
             var button = buttons[i];
+            var buttonType = button.GetEntityType();
             button.isPressed = state.buttonStates[i];
-            if (button.isPressed) pressedButtonCount++;
+            if (button.isPressed)
+            {
+                buttonPressCounts[buttonType.buttonColor]++;
+            }
+        }
+
+        foreach (var buttonColor in ButtonEntity.buttonColors)
+        {
+            buttonStates[buttonColor] = buttonPressCounts[buttonColor] % 2 == 1;
         }
     }
 
@@ -140,15 +143,37 @@ public class Puzzle
         return positions.Contains(position);
     }
 
-    public bool HasObject(Vector2Int position, PuzzleEntityType entityType)
+    public bool HasEntity(Vector2Int position, PuzzleEntityType entityType)
     {
-        return entities.TryGetValue(position, out var dict) && dict.ContainsKey(entityType);
+        return entitiesByPosition.TryGetValue(position, out var dict) && dict.ContainsKey(entityType);
     }
 
     public bool HasEntity(Vector2Int position, PuzzleEntityType type, out PuzzleEntity entity)
     {
         entity = null;
-        return entities.TryGetValue(position, out var dict) && dict.TryGetValue(type, out entity);
+        return entitiesByPosition.TryGetValue(position, out var dict) && dict.TryGetValue(type, out entity);
+    }
+
+    public void UpdateEntityPosition(PuzzleEntity entity)
+    {
+        var type = entity.GetEntityType();
+        var from = storedEntityPosition[entity];
+        var to = entity.position;
+        if (from == to) return;
+
+        entitiesByPosition[from].Remove(type.basicType);
+        if (entitiesByPosition[from].Count == 0)
+        {
+            entitiesByPosition.Remove(from);
+        }
+
+        if (!entitiesByPosition.ContainsKey(to))
+        {
+            entitiesByPosition.Add(to, new());
+        }
+        entitiesByPosition[to].Add(type.basicType, entity);
+
+        storedEntityPosition[entity] = to;
     }
 }
 

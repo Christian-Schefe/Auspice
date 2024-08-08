@@ -307,7 +307,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tiles_button
+      name: tiles_button_red
       rect:
         serializedVersion: 2
         x: 32
@@ -328,7 +328,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tiles_button_pressed
+      name: tiles_button_red_pressed
       rect:
         serializedVersion: 2
         x: 48
@@ -349,7 +349,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tiles_spikes
+      name: tiles_spikes_red
       rect:
         serializedVersion: 2
         x: 64
@@ -370,7 +370,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tiles_spikes_extended
+      name: tiles_spikes_red_extended
       rect:
         serializedVersion: 2
         x: 80
@@ -415,8 +415,8 @@ TextureImporter:
       name: tiles_selection
       rect:
         serializedVersion: 2
-        x: 0
-        y: 79
+        x: 111
+        y: 0
         width: 17
         height: 17
       alignment: 0
@@ -432,6 +432,132 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: tiles_star
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 96
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3ba88e1cceec9f840b8c261ac0f63764
+      internalID: 1956890959
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_star_hole
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 80
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 51653ad3caa3e644ab985c6eca304a5b
+      internalID: 2141148907
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_button_blue
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 80
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 076ecfe6e8a70994d9a0a6385ee8d6fa
+      internalID: 1052373530
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_button_blue_pressed
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 80
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6ea32325562e8a3449755974219f9542
+      internalID: 441154317
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_spikes_blue
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 80
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 567898f32683ad34a8f419f5586bef04
+      internalID: -519478516
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_button_blue_extended
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 80
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2afd8e10fe70b87459626c9e97bf0207
+      internalID: -1849667699
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -443,8 +569,11 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      tiles_button: -366742648
-      tiles_button_pressed: -2061729499
+      tiles_button_blue: 1052373530
+      tiles_button_blue_extended: -1849667699
+      tiles_button_blue_pressed: 441154317
+      tiles_button_red: -366742648
+      tiles_button_red_pressed: -2061729499
       tiles_chest: -788408014
       tiles_crab: -1559163241
       tiles_crate: -1831053822
@@ -454,8 +583,11 @@ TextureImporter:
       tiles_key: -1812539496
       tiles_sand: 775232248
       tiles_selection: -1669403849
-      tiles_spikes: -394579013
-      tiles_spikes_extended: -1270377434
+      tiles_spikes_blue: -519478516
+      tiles_spikes_red: -394579013
+      tiles_spikes_red_extended: -1270377434
+      tiles_star: 1956890959
+      tiles_star_hole: 2141148907
       tiles_stone: -667129138
       tiles_wall: -551709983
       tiles_water: -601442794

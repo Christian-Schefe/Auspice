@@ -6,9 +6,10 @@ using UnityEngine;
 public class PuzzleData
 {
     public HashSet<Vector2Int> positions = new();
-    public Dictionary<Vector2Int, Dictionary<PuzzleEntityType, (PuzzleEntity, bool)>> entities = new();
+    public Dictionary<Vector2Int, Dictionary<EntityType, (PuzzleEntity, bool)>> entities = new();
 
-    public Dictionary<PuzzleEntityType, int?> editableEntities = new();
+    public Dictionary<EntityType, int?> editableEntities = new();
+    public List<int> starTresholds = new();
 
     public PuzzleData() { }
 
@@ -18,7 +19,7 @@ public class PuzzleData
     {
         if (!entities.ContainsKey(entity.position))
         {
-            entities.Add(entity.position, new Dictionary<PuzzleEntityType, (PuzzleEntity, bool)> { { entity.GetEntityType(), (entity, isEditable) } });
+            entities.Add(entity.position, new Dictionary<EntityType, (PuzzleEntity, bool)> { { entity.GetEntityType(), (entity, isEditable) } });
             return true;
         }
         else if (!entities[entity.position].ContainsKey(entity.GetEntityType()))
@@ -29,9 +30,9 @@ public class PuzzleData
         return false;
     }
 
-    public List<PuzzleEntityType> Remove(Vector2Int pos)
+    public List<EntityType> Remove(Vector2Int pos)
     {
-        var removedEntities = new List<PuzzleEntityType>();
+        var removedEntities = new List<EntityType>();
 
         if (entities.ContainsKey(pos))
         {
