@@ -12,16 +12,12 @@ public abstract class PlayerEntity : PuzzleEntity
         originalPosition = Vector2Int.zero;
     }
 
-    public PlayerEntity(Vector2Int position) : base(position)
+    public PlayerEntity(Vector2Int position) : base(position, PuzzleEntityType.Player)
     {
         originalPosition = position;
     }
 
     public abstract List<Vector2Int> GetMovePositions(Puzzle puzzle);
-    public override EntityType GetEntityType()
-    {
-        return EntityType.Player;
-    }
 }
 
 [IsDerivedClass("CrabPlayer")]

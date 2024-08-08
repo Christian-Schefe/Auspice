@@ -1,9 +1,9 @@
 {
   "dependencies": {
     "com.meeshroom.yeast": {
-      "version": "file:com.meeshroom.yeast",
+      "version": "file:C:/Users/E0007435/Documents/Development/Sandbox/Yeast",
       "depth": 0,
-      "source": "embedded",
+      "source": "local",
       "dependencies": {}
     },
     "com.unity.2d.animation": {

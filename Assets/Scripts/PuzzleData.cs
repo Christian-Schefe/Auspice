@@ -6,49 +6,42 @@ using UnityEngine;
 public class PuzzleData
 {
     public HashSet<Vector2Int> positions = new();
-    public Dictionary<Vector2Int, HashSet<PuzzleObject>> puzzleObjects = new();
-    public Dictionary<Vector2Int, Dictionary<EntityType, PuzzleEntity>> puzzleEntities = new();
+    public Dictionary<Vector2Int, Dictionary<PuzzleEntityType, (PuzzleEntity, bool)>> entities = new();
+
+    public Dictionary<PuzzleEntityType, int?> editableEntities = new();
 
     public PuzzleData() { }
-    public PuzzleData(HashSet<Vector2Int> positions)
+
+    public void SetPositions(HashSet<Vector2Int> positions) => this.positions = positions;
+
+    public bool TryAddEntity(PuzzleEntity entity, bool isEditable = true)
     {
-        this.positions = positions;
+        if (!entities.ContainsKey(entity.position))
+        {
+            entities.Add(entity.position, new Dictionary<PuzzleEntityType, (PuzzleEntity, bool)> { { entity.GetEntityType(), (entity, isEditable) } });
+            return true;
+        }
+        else if (!entities[entity.position].ContainsKey(entity.GetEntityType()))
+        {
+            entities[entity.position].Add(entity.GetEntityType(), (entity, isEditable));
+            return true;
+        }
+        return false;
     }
 
-    public void AddObject(Vector2Int pos, PuzzleObject obj)
+    public List<PuzzleEntityType> Remove(Vector2Int pos)
     {
-        if (!puzzleObjects.ContainsKey(pos))
-        {
-            puzzleObjects.Add(pos, new HashSet<PuzzleObject> { obj });
-        }
-        else
-        {
-            puzzleObjects[pos].Add(obj);
-        }
-    }
+        var removedEntities = new List<PuzzleEntityType>();
 
-    public void AddEntity(PuzzleEntity entity)
-    {
-        if (!puzzleEntities.ContainsKey(entity.position))
+        if (entities.ContainsKey(pos))
         {
-            puzzleEntities.Add(entity.position, new Dictionary<EntityType, PuzzleEntity> { { entity.GetEntityType(), entity } });
+            foreach (var (type, (_, isEditable)) in entities[pos].ToList())
+            {
+                if (!isEditable) continue;
+                entities[pos].Remove(type);
+                removedEntities.Add(type);
+            }
         }
-        else
-        {
-            puzzleEntities[entity.position].Add(entity.GetEntityType(), entity);
-        }
-    }
-
-    public void Remove(Vector2Int pos)
-    {
-        if (puzzleObjects.ContainsKey(pos))
-        {
-            puzzleObjects.Remove(pos);
-        }
-
-        if (puzzleEntities.TryGetValue(pos, out var entities))
-        {
-            puzzleEntities.Remove(pos);
-        }
+        return removedEntities;
     }
 }

@@ -4,22 +4,28 @@ using System.Collections.Generic;
 using UnityEngine;
 using Yeast;
 
-public enum EntityType
-{
-    Button,
-    Player,
-}
 
-[HasDerivedClasses(typeof(ButtonEntity), typeof(CrabPlayer))]
+[HasDerivedClasses(typeof(ButtonEntity), typeof(CrabPlayer), typeof(GenericEntity))]
 public abstract class PuzzleEntity
 {
     public Vector2Int position;
+    public PuzzleEntityType entityType;
 
-    public PuzzleEntity(Vector2Int position)
+    public PuzzleEntity(Vector2Int position, PuzzleEntityType entityType)
     {
         this.position = position;
+        this.entityType = entityType;
     }
-    public abstract EntityType GetEntityType();
+
+    public PuzzleEntityType GetEntityType() => entityType;
+}
+
+[IsDerivedClass("GenericEntity")]
+public class GenericEntity : PuzzleEntity
+{
+    public GenericEntity() : this(Vector2Int.zero, PuzzleEntityType.None) { }
+
+    public GenericEntity(Vector2Int position, PuzzleEntityType type) : base(position, type) { }
 }
 
 [IsDerivedClass("ButtonEntity")]
@@ -29,13 +35,8 @@ public class ButtonEntity : PuzzleEntity
 
     public ButtonEntity() : this(Vector2Int.zero) { }
 
-    public ButtonEntity(Vector2Int position) : base(position)
+    public ButtonEntity(Vector2Int position) : base(position, PuzzleEntityType.Button)
     {
         isPressed = false;
-    }
-
-    public override EntityType GetEntityType()
-    {
-        return EntityType.Button;
     }
 }

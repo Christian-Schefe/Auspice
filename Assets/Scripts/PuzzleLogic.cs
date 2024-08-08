@@ -16,7 +16,7 @@ public class PuzzleLogic
         puzzle.SetState(state);
 
         var moves = new List<List<Vector2Int>>();
-        var players = puzzle.GetEntities<PlayerEntity>(EntityType.Player);
+        var players = puzzle.GetEntities<PlayerEntity>(PuzzleEntityType.Player);
         for (int i = 0; i < players.Count; i++)
         {
             var playerMoves = players[i].GetMovePositions(puzzle);
@@ -44,7 +44,7 @@ public class PuzzleLogic
 
         var usedPositions = new HashSet<Vector2Int>();
         puzzle.SetState(state);
-        var players = puzzle.GetEntities<PlayerEntity>(EntityType.Player);
+        var players = puzzle.GetEntities<PlayerEntity>(PuzzleEntityType.Player);
         for (int i = 0; i < players.Count; i++)
         {
             if (usedPositions.Contains(to[i]))
@@ -60,7 +60,7 @@ public class PuzzleLogic
             usedPositions.Add(to[i]);
             players[i].position = to[i];
 
-            if (oldPos != to[i] && puzzle.HasEntity(to[i], EntityType.Button, out var buttonEntity))
+            if (oldPos != to[i] && puzzle.HasEntity(to[i], PuzzleEntityType.Button, out var buttonEntity))
             {
                 var button = (ButtonEntity)buttonEntity;
                 button.isPressed = !button.isPressed;
@@ -71,11 +71,11 @@ public class PuzzleLogic
 
         for (int i = 0; i < players.Count; i++)
         {
-            if (!buttonToggleState && puzzle.HasObject(to[i], PuzzleObject.OnSpike))
+            if (!buttonToggleState && puzzle.HasObject(to[i], PuzzleEntityType.OnSpike))
             {
                 return false;
             }
-            else if (buttonToggleState && puzzle.HasObject(to[i], PuzzleObject.OffSpike))
+            else if (buttonToggleState && puzzle.HasObject(to[i], PuzzleEntityType.OffSpike))
             {
                 return false;
             }
@@ -91,11 +91,11 @@ public class PuzzleLogic
         {
             return false;
         }
-        if (puzzle.HasObject(pos, PuzzleObject.Wall))
+        if (puzzle.HasObject(pos, PuzzleEntityType.Wall))
         {
             return false;
         }
-        if (puzzle.HasObject(pos, PuzzleObject.Water))
+        if (puzzle.HasObject(pos, PuzzleEntityType.Water))
         {
             return false;
         }

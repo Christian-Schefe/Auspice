@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Yeast.Json;
 
 public class PuzzleEditor : MonoBehaviour
 {
@@ -9,10 +10,13 @@ public class PuzzleEditor : MonoBehaviour
         Erase, Wall, Button, Chest, Player, OnSpike, OffSpike
     }
 
+    public TextAsset levelData;
+
 
     public Mode mode;
 
     public LevelVisuals visuals;
+    public UIBuildMenu buildMenu;
 
     public bool isPlaying;
 
@@ -21,32 +25,31 @@ public class PuzzleEditor : MonoBehaviour
 
     private void Awake()
     {
-        var positions = new HashSet<Vector2Int>();
+        data = JSON.Parse<PuzzleData>(levelData.text);
 
-        var size = new Vector2Int(10, 8);
+        usedPositions = new HashSet<Vector2Int>(data.entities.Keys);
+        visuals.SetData(data);
 
-        for (int x = 0; x < size.x; x++)
+        buildMenu.SetData(data.editableEntities, OnSelectErase, OnSelectEntity);
+    }
+
+    private void OnSelectEntity(PuzzleEntityType type)
+    {
+        mode = type switch
         {
-            for (int y = 0; y < size.y; y++)
-            {
-                positions.Add(new Vector2Int(x, y));
-            }
-        }
+            PuzzleEntityType.Wall => Mode.Wall,
+            PuzzleEntityType.OnSpike => Mode.OnSpike,
+            PuzzleEntityType.OffSpike => Mode.OffSpike,
+            PuzzleEntityType.Chest => Mode.Chest,
+            PuzzleEntityType.Button => Mode.Button,
+            PuzzleEntityType.Player => Mode.Player,
+            _ => mode
+        };
+    }
 
-        data = new PuzzleData(positions);
-        usedPositions = new HashSet<Vector2Int>();
-        visuals.SetPositions(positions);
-        for (int x = -1; x <= size.x; x++)
-        {
-            for (int y = -1; y <= size.y; y++)
-            {
-                var pos = new Vector2Int(x, y);
-                if (pos.x == -1 || pos.y == -1 || pos.x == size.x || pos.y == size.y)
-                {
-                    visuals.AddWall(pos);
-                }
-            }
-        }
+    private void OnSelectErase()
+    {
+        mode = Mode.Erase;
     }
 
     public Puzzle BuildPuzzle()
@@ -108,8 +111,13 @@ public class PuzzleEditor : MonoBehaviour
         if (mode == Mode.Erase)
         {
             visuals.Remove(position);
-            data.Remove(position);
-            usedPositions.Remove(position);
+            var removedEntities = data.Remove(position);
+            if (removedEntities.Count > 0) usedPositions.Remove(position);
+
+            foreach (var entity in removedEntities)
+            {
+                buildMenu.ReturnEntity(entity);
+            }
             return;
         }
 
@@ -117,39 +125,47 @@ public class PuzzleEditor : MonoBehaviour
         {
             return;
         }
-        usedPositions.Add(position);
 
+        Debug.Log($"Placing {mode} at {position}");
         if (mode == Mode.Wall)
         {
+            if (!buildMenu.TryConsumeEntity(PuzzleEntityType.Wall)) return;
+            if (!data.TryAddEntity(new GenericEntity(position, PuzzleEntityType.Wall))) return;
             visuals.AddWall(position);
-            data.AddObject(position, PuzzleObject.Wall);
         }
         else if (mode == Mode.OnSpike)
         {
+            if (!buildMenu.TryConsumeEntity(PuzzleEntityType.OnSpike)) return;
+            if (!data.TryAddEntity(new GenericEntity(position, PuzzleEntityType.OnSpike))) return;
             visuals.AddOnSpikes(position);
-            data.AddObject(position, PuzzleObject.OnSpike);
         }
         else if (mode == Mode.OffSpike)
         {
+            if (!buildMenu.TryConsumeEntity(PuzzleEntityType.OffSpike)) return;
+            if (!data.TryAddEntity(new GenericEntity(position, PuzzleEntityType.OffSpike))) return;
             visuals.AddOffSpikes(position);
-            data.AddObject(position, PuzzleObject.OffSpike);
         }
         else if (mode == Mode.Chest)
         {
+            if (!buildMenu.TryConsumeEntity(PuzzleEntityType.Chest)) return;
+            if (!data.TryAddEntity(new GenericEntity(position, PuzzleEntityType.Chest))) return;
             visuals.AddChest(position);
-            data.AddObject(position, PuzzleObject.Chest);
         }
         else if (mode == Mode.Button)
         {
+            if (!buildMenu.TryConsumeEntity(PuzzleEntityType.Button)) return;
             var button = new ButtonEntity(position);
+            if (!data.TryAddEntity(button)) return;
             visuals.AddButton(button);
-            data.AddEntity(button);
         }
         else if (mode == Mode.Player)
         {
+            if (!buildMenu.TryConsumeEntity(PuzzleEntityType.Player)) return;
             var player = new CrabPlayer(position);
+            if (!data.TryAddEntity(player)) return;
             visuals.AddPlayer(player);
-            data.AddEntity(player);
         }
+
+        usedPositions.Add(position);
     }
 }

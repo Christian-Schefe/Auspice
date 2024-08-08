@@ -16,10 +16,10 @@ public class PuzzleReplayer : MonoBehaviour
     {
         Debug.Log("Start Replay: " + actions.Count + " Items");
 
-        var players = puzzle.GetEntities<PlayerEntity>(EntityType.Player);
-        var buttons = puzzle.GetEntities<ButtonEntity>(EntityType.Button);
-        var offSpikes = puzzle.GetObjects(PuzzleObject.OffSpike);
-        var onSpikes = puzzle.GetObjects(PuzzleObject.OnSpike);
+        var players = puzzle.GetEntities<PlayerEntity>(PuzzleEntityType.Player);
+        var buttons = puzzle.GetEntities<ButtonEntity>(PuzzleEntityType.Button);
+        var offSpikes = puzzle.GetEntities<GenericEntity>(PuzzleEntityType.OffSpike);
+        var onSpikes = puzzle.GetEntities<GenericEntity>(PuzzleEntityType.OnSpike);
 
         foreach (var state in actions)
         {
@@ -46,13 +46,13 @@ public class PuzzleReplayer : MonoBehaviour
             }
 
             var buttonState = puzzle.GetButtonToggleState();
-            foreach (var pos in offSpikes)
+            foreach (var spike in offSpikes)
             {
-                levelVisuals.UpdateOffSpikeTile(pos, buttonState);
+                levelVisuals.UpdateOffSpikeTile(spike.position, buttonState);
             }
-            foreach (var pos in onSpikes)
+            foreach (var spike in onSpikes)
             {
-                levelVisuals.UpdateOnSpikeTile(pos, buttonState);
+                levelVisuals.UpdateOnSpikeTile(spike.position, buttonState);
             }
         }
     }

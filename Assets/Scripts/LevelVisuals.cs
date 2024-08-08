@@ -23,27 +23,38 @@ public class LevelVisuals : MonoBehaviour
 
     [SerializeField] private Sprite buttonNotPressedSprite, buttonPressedSprite;
 
-    private readonly Dictionary<(Vector2Int, PuzzleObject), GameObject> puzzleObjects = new();
+    private readonly Dictionary<(Vector2Int, PuzzleEntityType), GameObject> puzzleObjects = new();
     private readonly Dictionary<PuzzleEntity, GameObject> puzzleEntities = new();
 
-    public void SetPositions(IEnumerable<Vector2Int> positions)
+    public void SetData(PuzzleData data)
     {
-        var min = positions.Aggregate(Vector2Int.Min);
-        var max = positions.Aggregate(Vector2Int.Max);
+        var min = data.positions.Aggregate(Vector2Int.Min);
+        var max = data.positions.Aggregate(Vector2Int.Max);
 
         var camPos = WorldPos((Vector2)(max + min) * 0.5f);
         cam.transform.position = new Vector3(camPos.x, camPos.y, cam.transform.position.z);
 
-        foreach (var pos in positions)
+        foreach (var pos in data.positions)
         {
             groundTilemap.SetTile((Vector3Int)pos, groundTile);
+
+            if (!data.entities.TryGetValue(pos, out var entities)) continue;
+            foreach (var (type, (entity, _)) in entities)
+            {
+                if (type == PuzzleEntityType.Wall) AddWall(entity.position);
+                else if (type == PuzzleEntityType.Button) AddButton((ButtonEntity)entity);
+                else if (type == PuzzleEntityType.Player) AddPlayer((PlayerEntity)entity);
+                else if (type == PuzzleEntityType.Chest) AddChest(entity.position);
+                else if (type == PuzzleEntityType.OnSpike) AddOnSpikes(entity.position);
+                else if (type == PuzzleEntityType.OffSpike) AddOffSpikes(entity.position);
+            }
         }
     }
 
     public void AddWall(Vector2Int pos)
     {
         objectTilemap.SetTile((Vector3Int)pos, wallTile);
-        puzzleObjects.Add((pos, PuzzleObject.Wall), null);
+        puzzleObjects.Add((pos, PuzzleEntityType.Wall), null);
     }
 
     public void AddButton(ButtonEntity button)
@@ -61,19 +72,19 @@ public class LevelVisuals : MonoBehaviour
     public void AddChest(Vector2Int pos)
     {
         var instance = Instantiate(chestPrefab, WorldPos(pos), Quaternion.identity);
-        puzzleObjects.Add((pos, PuzzleObject.Chest), instance);
+        puzzleObjects.Add((pos, PuzzleEntityType.Chest), instance);
     }
 
     public void AddOnSpikes(Vector2Int pos)
     {
         objectTilemap.SetTile((Vector3Int)pos, onSpikeTile);
-        puzzleObjects.Add((pos, PuzzleObject.OnSpike), null);
+        puzzleObjects.Add((pos, PuzzleEntityType.OnSpike), null);
     }
 
     public void AddOffSpikes(Vector2Int pos)
     {
         objectTilemap.SetTile((Vector3Int)pos, offSpikeTile);
-        puzzleObjects.Add((pos, PuzzleObject.OffSpike), null);
+        puzzleObjects.Add((pos, PuzzleEntityType.OffSpike), null);
     }
 
     public void UpdatePlayerPosition(PlayerEntity player)
@@ -103,7 +114,7 @@ public class LevelVisuals : MonoBehaviour
 
     public void Remove(Vector2Int pos)
     {
-        var enumVals = System.Enum.GetValues(typeof(PuzzleObject)).Cast<PuzzleObject>();
+        var enumVals = System.Enum.GetValues(typeof(PuzzleEntityType)).Cast<PuzzleEntityType>();
         foreach (var objectType in enumVals)
         {
             if (!puzzleObjects.TryGetValue((pos, objectType), out var go)) continue;
