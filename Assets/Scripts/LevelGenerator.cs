@@ -37,14 +37,14 @@ public class LevelGenerator : ScriptableObject
         data.editableEntities = new Dictionary<EntityType, int?>
         {
             { new EntityType(PuzzleEntityType.Wall), null },
-            { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Red, spikeInitialState:true), null },
-            { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Red, spikeInitialState:false), null },
-            { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Blue, spikeInitialState:true), null },
-            { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Blue, spikeInitialState:false), null },
-            { new EntityType(PuzzleEntityType.Chest), null },
+            { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Red, spikeInitialState:true), 5 },
+            { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Red, spikeInitialState:false), 5 },
+            { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Blue, spikeInitialState:true), 5 },
+            { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Blue, spikeInitialState:false), 5 },
+            { new EntityType(PuzzleEntityType.Chest), 2 },
             { new EntityType(PuzzleEntityType.Button, buttonColor: ButtonColor.Red), null },
             { new EntityType(PuzzleEntityType.Button, buttonColor: ButtonColor.Blue), null },
-            { new EntityType(PuzzleEntityType.Player, playerType: PlayerType.Crab), null }
+            { new EntityType(PuzzleEntityType.Player, playerType: PlayerType.Crab), 2 }
         };
 
         data.starTresholds = starThresholds;

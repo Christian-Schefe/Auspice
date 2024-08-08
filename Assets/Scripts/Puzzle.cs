@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class Puzzle
 {
@@ -16,10 +17,10 @@ public class Puzzle
 
         foreach (var pos in data.positions)
         {
+            entitiesByPosition.Add(pos, new());
+
             if (data.entities.ContainsKey(pos))
             {
-                entitiesByPosition.Add(pos, new());
-
                 foreach (var (type, (entity, _)) in data.entities[pos])
                 {
                     if (!entitiesByType.ContainsKey(type.basicType)) entitiesByType.Add(type.basicType, new() { entity });
@@ -112,7 +113,15 @@ public class Puzzle
         {
             var player = players[i];
             player.position = state.playerPosition[i];
-            UpdateEntityPosition(player);
+
+            var from = storedEntityPosition[player];
+            entitiesByPosition[from].Remove(PuzzleEntityType.Player);
+        }
+
+        foreach (var player in players)
+        {
+            entitiesByPosition[player.position].Add(PuzzleEntityType.Player, player);
+            storedEntityPosition[player] = player.position;
         }
 
         var buttonPressCounts = new Dictionary<ButtonColor, int>();
@@ -145,35 +154,12 @@ public class Puzzle
 
     public bool HasEntity(Vector2Int position, PuzzleEntityType entityType)
     {
-        return entitiesByPosition.TryGetValue(position, out var dict) && dict.ContainsKey(entityType);
+        return entitiesByPosition[position].ContainsKey(entityType);
     }
 
     public bool HasEntity(Vector2Int position, PuzzleEntityType type, out PuzzleEntity entity)
     {
-        entity = null;
-        return entitiesByPosition.TryGetValue(position, out var dict) && dict.TryGetValue(type, out entity);
-    }
-
-    public void UpdateEntityPosition(PuzzleEntity entity)
-    {
-        var type = entity.GetEntityType();
-        var from = storedEntityPosition[entity];
-        var to = entity.position;
-        if (from == to) return;
-
-        entitiesByPosition[from].Remove(type.basicType);
-        if (entitiesByPosition[from].Count == 0)
-        {
-            entitiesByPosition.Remove(from);
-        }
-
-        if (!entitiesByPosition.ContainsKey(to))
-        {
-            entitiesByPosition.Add(to, new());
-        }
-        entitiesByPosition[to].Add(type.basicType, entity);
-
-        storedEntityPosition[entity] = to;
+        return entitiesByPosition[position].TryGetValue(type, out entity);
     }
 }
 

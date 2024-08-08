@@ -26,7 +26,6 @@ public class PuzzleReplayer : MonoBehaviour
         for (int i = 0; i < actions.Count; i++)
         {
             var state = actions[i];
-            Debug.Log("Replaying: " + state);
             SetState(state);
             stepCallback?.Invoke(i);
             yield return new WaitForSeconds(0.2f);
