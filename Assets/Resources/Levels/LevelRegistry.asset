@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: edcfd662baebd5f4a948138d4244bfb2, type: 3}
-  m_Name: LevelGenerator
+  m_Script: {fileID: 11500000, guid: 961c174742ba00f469d30f53fcd97d26, type: 3}
+  m_Name: LevelRegistry
   m_EditorClassIdentifier: 
-  size: {x: 11, y: 5}
-  levelName: level2
-  starThresholds: 0a0000001400000046000000
+  entries:
+  - levelData: {fileID: 4900000, guid: f8294f02b4460af439482e7b71d0d568, type: 3}
+  - levelData: {fileID: 4900000, guid: cea9ad1bbe1422646a32f74e82a20be3, type: 3}

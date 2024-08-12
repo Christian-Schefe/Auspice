@@ -567,7 +567,7 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -588,7 +588,7 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -596,6 +596,216 @@ TextureImporter:
       bones: []
       spriteID: c78e1abd4657efb438e7291c3d0af95d
       internalID: 949259356
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_wooden_board
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 48
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 4, y: 4, z: 4, w: 4}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 65cdaa4ec535e094d99a88e84fa442fe
+      internalID: 1266474927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_stone_board
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 64
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 2, y: 2, z: 2, w: 2}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e3bb894447bac2b4e81210703ada8154
+      internalID: -531991049
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_conveyor_left
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 64
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 60efe2ae6a2668c4b8ab9071bde9cc85
+      internalID: -1826842820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_conveyor_down
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 64
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2cd10924d32b343479c49703fefff04e
+      internalID: -759219117
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_conveyor_up
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 48
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af1cbdcb9e66118408f96a326a787cc8
+      internalID: -498942667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_conveyor_lef
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 48
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7566110fb68ccea41b6fe7c8f7654e74
+      internalID: -491812478
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_pressure_plate_blue
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 64
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a017689511289494a9611b1558393df9
+      internalID: -1616920692
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_pressure_plate_blue_pressed
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 64
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b0906c5014a968e469cb0b12d0001555
+      internalID: -1604154131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_pressure_plate_red
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 48
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 12254250fc3cb854d863f5f1494ddb02
+      internalID: 641760671
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_pressure_plate_red_pressed
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 48
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b2bb37a1e18ba72408cd2e32c399175e
+      internalID: -1260097947
       vertices: []
       indices: 
       edges: []
@@ -617,6 +827,10 @@ TextureImporter:
       tiles_button_red: -366742648
       tiles_button_red_pressed: -2061729499
       tiles_chest: -788408014
+      tiles_conveyor_down: -759219117
+      tiles_conveyor_lef: -491812478
+      tiles_conveyor_left: -1826842820
+      tiles_conveyor_up: -498942667
       tiles_crab: -1559163241
       tiles_crate: -1831053822
       tiles_door: -960571066
@@ -625,6 +839,10 @@ TextureImporter:
       tiles_grass: 777665900
       tiles_key: -1812539496
       tiles_octopus: -1978703212
+      tiles_pressure_plate_blue: -1616920692
+      tiles_pressure_plate_blue_pressed: -1604154131
+      tiles_pressure_plate_red: 641760671
+      tiles_pressure_plate_red_pressed: -1260097947
       tiles_sand: 775232248
       tiles_selection: -1669403849
       tiles_spikes_blue: -519478516
@@ -633,8 +851,10 @@ TextureImporter:
       tiles_star: 1956890959
       tiles_star_hole: 2141148907
       tiles_stone: -667129138
+      tiles_stone_board: -531991049
       tiles_wall: -551709983
       tiles_water: -601442794
+      tiles_wooden_board: 1266474927
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

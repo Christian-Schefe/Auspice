@@ -45,45 +45,56 @@ public class PuzzleLogic
         var usedPositions = new HashSet<Vector2Int>();
         puzzle.SetState(state);
         var players = puzzle.GetEntities<PlayerEntity>(PuzzleEntityType.Player);
+        var crates = puzzle.GetEntities<GenericEntity>(PuzzleEntityType.Crate);
+
+        var oldPositions = new List<Vector2Int>();
+
         for (int i = 0; i < players.Count; i++)
         {
             var dir = to[i] - players[i].position;
 
-            if (usedPositions.Contains(to[i]))
-            {
-                return false;
-            }
-            if (!CanWalkStatic(puzzle, to[i], dir))
-            {
-                return false;
-            }
+            if (usedPositions.Contains(to[i])) return false;
+            if (!CanWalk(puzzle, to[i], dir)) return false;
 
             var oldPos = players[i].position;
+            oldPositions.Add(oldPos);
             usedPositions.Add(to[i]);
             players[i].position = to[i];
-
-            if (oldPos != to[i] && puzzle.HasEntity(to[i], PuzzleEntityType.Button, out var buttonEntity))
-            {
-                var button = (ButtonEntity)buttonEntity;
-                button.isPressed = !button.isPressed;
-            }
 
             if (puzzle.HasEntity(to[i], PuzzleEntityType.Crate, out var crateEntity))
             {
                 var crateTo = to[i] + dir;
-                if (usedPositions.Contains(crateTo))
-                {
-                    return false;
-                }
+                if (usedPositions.Contains(crateTo)) return false;
 
                 crateEntity.position = crateTo;
                 usedPositions.Add(crateTo);
             }
         }
 
+        var pushables = new List<PuzzleEntity>();
+        pushables.AddRange(players);
+        pushables.AddRange(crates);
+        if (!DoShift(puzzle, pushables)) return false;
+
         for (int i = 0; i < players.Count; i++)
         {
-            if (puzzle.HasEntity(to[i], PuzzleEntityType.Spike, out var spike))
+            if (oldPositions[i] != to[i] && puzzle.HasEntity(to[i], PuzzleEntityType.Button, out var buttonEntity))
+            {
+                var button = (ButtonEntity)buttonEntity;
+                button.isPressed = !button.isPressed;
+            }
+        }
+
+        if (!TestSpikes(puzzle, players)) return false;
+
+        return true;
+    }
+
+    private bool TestSpikes(Puzzle puzzle, List<PlayerEntity> players)
+    {
+        foreach (var player in players)
+        {
+            if (puzzle.HasEntity(player.position, PuzzleEntityType.Spike, out var spike))
             {
                 var type = spike.GetEntityType();
                 bool buttonToggleState = puzzle.GetButtonToggleState(type.buttonColor);
@@ -95,11 +106,43 @@ public class PuzzleLogic
             }
         }
 
-        nextState = puzzle.GetState();
         return true;
     }
 
-    private bool CanWalkStatic(Puzzle puzzle, Vector2Int pos, Vector2Int dir, bool allowCratePush = true)
+    private bool DoShift(Puzzle puzzle, List<PuzzleEntity> pushables)
+    {
+        var usedPositions = new HashSet<Vector2Int>();
+        foreach (var pushable in pushables)
+        {
+            if (puzzle.HasEntity(pushable.position, PuzzleEntityType.Conveyor, out var conveyor))
+            {
+                var dir = conveyor.GetEntityType().direction switch
+                {
+                    Direction.Up => Vector2Int.up,
+                    Direction.Down => Vector2Int.down,
+                    Direction.Left => Vector2Int.left,
+                    Direction.Right => Vector2Int.right,
+                    _ => Vector2Int.zero
+                };
+                var to = pushable.position + dir;
+                pushable.position = to;
+
+                if (!CanWalkStatic(puzzle, to)) return false;
+
+                if (usedPositions.Contains(to)) return false;
+                usedPositions.Add(to);
+            }
+            else
+            {
+                if (usedPositions.Contains(pushable.position)) return false;
+                usedPositions.Add(pushable.position);
+            }
+        }
+
+        return true;
+    }
+
+    private bool CanWalkStatic(Puzzle puzzle, Vector2Int pos)
     {
         if (!puzzle.IsValidPosition(pos))
         {
@@ -109,12 +152,18 @@ public class PuzzleLogic
         {
             return false;
         }
+        return true;
+    }
+
+    private bool CanWalk(Puzzle puzzle, Vector2Int pos, Vector2Int dir, bool allowCratePush = true)
+    {
+        if (!CanWalkStatic(puzzle, pos))
+        {
+            return false;
+        }
         if (puzzle.HasEntity(pos, PuzzleEntityType.Crate))
         {
-            if (!allowCratePush || !CanWalkStatic(puzzle, pos + dir, dir, allowCratePush: false))
-            {
-                return false;
-            }
+            return allowCratePush && CanWalkStatic(puzzle, pos + dir);
         }
         return true;
     }

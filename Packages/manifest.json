@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.meeshroom.tweenables": "file:C:/Users/Christian/Documents/Development/Sandbox/Tweenables",
+    "com.meeshroom.tweenables": "https://github.com/Christian-Schefe/Tweenables.git",
     "com.meeshroom.yeast": "https://github.com/Christian-Schefe/Yeast.git",
     "com.unity.collab-proxy": "2.4.4",
     "com.unity.feature.2d": "2.0.0",

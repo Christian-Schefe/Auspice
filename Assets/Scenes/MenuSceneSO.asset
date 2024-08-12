@@ -9,9 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: edcfd662baebd5f4a948138d4244bfb2, type: 3}
-  m_Name: LevelGenerator
+  m_Script: {fileID: 11500000, guid: 33d2ccd71d207f84892261734e4d7fd0, type: 3}
+  m_Name: MenuSceneSO
   m_EditorClassIdentifier: 
-  size: {x: 11, y: 5}
-  levelName: level2
-  starThresholds: 0a0000001400000046000000
+  sceneName: MenuScene

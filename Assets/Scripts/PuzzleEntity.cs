@@ -59,7 +59,14 @@ public enum PuzzleEntityType
     Spike,
     Button,
     Player,
-    Crate
+    Crate,
+    Conveyor,
+    PressurePlate
+}
+
+public enum Direction
+{
+    Right, Left, Up, Down
 }
 
 [Serializable]
@@ -69,13 +76,15 @@ public struct EntityType : IEquatable<EntityType>
     public ButtonColor buttonColor;
     public bool spikeInitialState;
     public PlayerType playerType;
+    public Direction direction;
 
-    public EntityType(PuzzleEntityType basicType, ButtonColor buttonColor = ButtonColor.Red, bool spikeInitialState = true, PlayerType playerType = PlayerType.Crab)
+    public EntityType(PuzzleEntityType basicType, ButtonColor buttonColor = ButtonColor.Red, bool spikeInitialState = true, PlayerType playerType = PlayerType.Crab, Direction direction = Direction.Right)
     {
         this.basicType = basicType;
         this.buttonColor = buttonColor;
         this.spikeInitialState = spikeInitialState;
         this.playerType = playerType;
+        this.direction = direction;
     }
 
     public override readonly bool Equals(object obj)
@@ -86,19 +95,29 @@ public struct EntityType : IEquatable<EntityType>
     public readonly bool Equals(EntityType other)
     {
         if (basicType != other.basicType) return false;
-        if (basicType == PuzzleEntityType.Button && buttonColor != other.buttonColor) return false;
-        if (basicType == PuzzleEntityType.Spike && (buttonColor != other.buttonColor || spikeInitialState != other.spikeInitialState)) return false;
-        if (basicType == PuzzleEntityType.Player && playerType != other.playerType) return false;
 
-        return true;
+        return basicType switch
+        {
+            PuzzleEntityType.Button => buttonColor == other.buttonColor,
+            PuzzleEntityType.Spike => buttonColor == other.buttonColor && spikeInitialState == other.spikeInitialState,
+            PuzzleEntityType.Player => playerType == other.playerType,
+            PuzzleEntityType.Conveyor => direction == other.direction,
+            PuzzleEntityType.PressurePlate => buttonColor == other.buttonColor,
+            _ => true
+        };
     }
 
     public override readonly int GetHashCode()
     {
-        if (basicType == PuzzleEntityType.Button) return HashCode.Combine(basicType, buttonColor);
-        if (basicType == PuzzleEntityType.Spike) return HashCode.Combine(basicType, buttonColor, spikeInitialState);
-        if (basicType == PuzzleEntityType.Player) return HashCode.Combine(basicType, playerType);
-        return HashCode.Combine(basicType);
+        return basicType switch
+        {
+            PuzzleEntityType.Button => HashCode.Combine(basicType, buttonColor),
+            PuzzleEntityType.Spike => HashCode.Combine(basicType, buttonColor, spikeInitialState),
+            PuzzleEntityType.Player => HashCode.Combine(basicType, playerType),
+            PuzzleEntityType.Conveyor => HashCode.Combine(basicType, direction),
+            PuzzleEntityType.PressurePlate => HashCode.Combine(basicType, buttonColor),
+            _ => HashCode.Combine(basicType)
+        };
     }
 
     public static bool operator ==(EntityType left, EntityType right)
@@ -113,9 +132,14 @@ public struct EntityType : IEquatable<EntityType>
 
     public override readonly string ToString()
     {
-        if (basicType == PuzzleEntityType.Button) return $"ButtonType({buttonColor})";
-        if (basicType == PuzzleEntityType.Spike) return $"SpikeType({buttonColor}, {spikeInitialState})";
-        if (basicType == PuzzleEntityType.Player) return $"PlayerType({playerType})";
-        return basicType.ToString() + "Type";
+        return basicType switch
+        {
+            PuzzleEntityType.Button => $"ButtonType({buttonColor})",
+            PuzzleEntityType.Spike => $"SpikeType({buttonColor}, {spikeInitialState})",
+            PuzzleEntityType.Player => $"PlayerType({playerType})",
+            PuzzleEntityType.Conveyor => $"ConveyorType({direction})",
+            PuzzleEntityType.PressurePlate => $"PressurePlateType({buttonColor})",
+            _ => basicType.ToString() + "Type"
+        };
     }
 }

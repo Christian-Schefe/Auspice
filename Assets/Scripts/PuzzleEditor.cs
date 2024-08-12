@@ -5,7 +5,9 @@ using Yeast.Json;
 
 public class PuzzleEditor : MonoBehaviour
 {
-    public TextAsset levelData;
+    private readonly ReadonlyPersistentValue<int> selectedLevelIndex = new("selectedLevelIndex", PersistenceMode.GlobalRuntime);
+
+    public LevelRegistry levelRegistry;
 
     public LevelVisuals visuals;
     public UIBuildMenu buildMenu;
@@ -15,13 +17,22 @@ public class PuzzleEditor : MonoBehaviour
     private EntityType selectedType;
 
     private bool isReplaying;
+    public bool isPaused;
 
     private PuzzleData data;
     private HashSet<Vector2Int> usedPositions;
 
+    public int GetSelectedLevelIndex() => selectedLevelIndex.Get();
+
     private void Awake()
     {
-        data = JSON.Parse<PuzzleData>(levelData.text);
+        if (!selectedLevelIndex.TryGet(out int levelIndex))
+        {
+            return;
+        }
+        Debug.Log(levelIndex);
+        var levelText = levelRegistry.entries[levelIndex].levelData;
+        data = JSON.Parse<PuzzleData>(levelText.text);
 
         usedPositions = new HashSet<Vector2Int>(data.entities.Keys);
         visuals.SetData(data);
@@ -58,7 +69,7 @@ public class PuzzleEditor : MonoBehaviour
 
     private void Update()
     {
-        if (isReplaying)
+        if (isReplaying || isPaused || data == null)
         {
             return;
         }

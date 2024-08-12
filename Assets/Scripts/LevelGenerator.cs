@@ -63,8 +63,10 @@ public class LevelGenerator : ScriptableObject
 
     private void WriteTextAsset(string json)
     {
+#if UNITY_EDITOR
         var path = $"Assets/Resources/Levels/{levelName}.json";
         System.IO.File.WriteAllText(path, json);
         UnityEditor.AssetDatabase.Refresh();
+#endif
     }
 }

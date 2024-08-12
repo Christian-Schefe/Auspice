@@ -114,6 +114,7 @@ public class Puzzle
         var players = GetEntities<PlayerEntity>(PuzzleEntityType.Player);
         var buttons = GetEntities<ButtonEntity>(PuzzleEntityType.Button);
         var crates = GetEntities<GenericEntity>(PuzzleEntityType.Crate);
+        var pressurePlates = GetEntities<GenericEntity>(PuzzleEntityType.PressurePlate);
 
         var playerPosition = new int[players.Count];
         for (int i = 0; i < players.Count; i++)
@@ -141,6 +142,16 @@ public class Puzzle
             }
         }
 
+        for (int i = 0; i < pressurePlates.Count; i++)
+        {
+            var pressurePlate = pressurePlates[i];
+            if (HasEntity(pressurePlate.position, PuzzleEntityType.Crate) || HasEntity(pressurePlate.position, PuzzleEntityType.Player))
+            {
+                var color = (int)pressurePlate.GetEntityType().buttonColor;
+                buttonStates[color] = !buttonStates[color];
+            }
+        }
+
         return new ReducedPuzzleState(playerPosition, cratePositions.ToArray(), buttonStates);
     }
 
@@ -149,6 +160,7 @@ public class Puzzle
         var players = GetEntities<PlayerEntity>(PuzzleEntityType.Player);
         var buttons = GetEntities<ButtonEntity>(PuzzleEntityType.Button);
         var crates = GetEntities<GenericEntity>(PuzzleEntityType.Crate);
+        var pressurePlates = GetEntities<GenericEntity>(PuzzleEntityType.PressurePlate);
 
         for (int i = 0; i < players.Count; i++)
         {
@@ -194,6 +206,16 @@ public class Puzzle
             if (button.isPressed)
             {
                 buttonPressCounts[buttonType.buttonColor]++;
+            }
+        }
+
+        for (int i = 0; i < pressurePlates.Count; i++)
+        {
+            var pressurePlate = pressurePlates[i];
+            var pressurePlateType = pressurePlate.GetEntityType();
+            if (HasEntity(pressurePlate.position, PuzzleEntityType.Crate) || HasEntity(pressurePlate.position, PuzzleEntityType.Player))
+            {
+                buttonPressCounts[pressurePlateType.buttonColor]++;
             }
         }
 
