@@ -810,6 +810,48 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: tiles_ice
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 80
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5fa781d4ffce27c449ee2bda82b2eec2
+      internalID: -1520764014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_starfish
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 64
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3b0cf451edb873547abd987afd953b34
+      internalID: -733706315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -837,6 +879,7 @@ TextureImporter:
       tiles_eraser: 1362699859
       tiles_fish: 949259356
       tiles_grass: 777665900
+      tiles_ice: -1520764014
       tiles_key: -1812539496
       tiles_octopus: -1978703212
       tiles_pressure_plate_blue: -1616920692
@@ -850,6 +893,7 @@ TextureImporter:
       tiles_spikes_red_extended: -1270377434
       tiles_star: 1956890959
       tiles_star_hole: 2141148907
+      tiles_starfish: -733706315
       tiles_stone: -667129138
       tiles_stone_board: -531991049
       tiles_wall: -551709983

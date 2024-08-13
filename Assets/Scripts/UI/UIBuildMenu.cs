@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 public class UIBuildMenu : MonoBehaviour
@@ -32,7 +30,6 @@ public class UIBuildMenu : MonoBehaviour
 
         foreach (var pair in editableEntities)
         {
-            Debug.Log("Pair: " + pair);
             var key = pair.Key;
             var onSelect = new System.Action(() =>
             {
@@ -41,7 +38,9 @@ public class UIBuildMenu : MonoBehaviour
                 selectedItem = entityData[key].Item2;
                 selectedItem.SetSelected(true);
             });
-            var data = new BuildItemData(pair.Value, iconSprites.Find(e => e.type == key).icon, onSelect);
+            var spriteEntry = iconSprites.Find(e => e.type == key);
+            Debug.Assert(spriteEntry != null, $"No sprite found for {key}");
+            var data = new BuildItemData(pair.Value, spriteEntry.icon, onSelect);
             var item = Instantiate(buildItemPrefab, layoutGroup);
             entityData[key] = (data, item);
             item.UpdateData(data);

@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Yeast.Json;
 
 public class PuzzleEditor : MonoBehaviour
 {
@@ -31,8 +29,7 @@ public class PuzzleEditor : MonoBehaviour
             return;
         }
         Debug.Log(levelIndex);
-        var levelText = levelRegistry.entries[levelIndex].levelData;
-        data = JSON.Parse<PuzzleData>(levelText.text);
+        data = levelRegistry.GetPuzzleDataInstance(levelIndex);
 
         usedPositions = new HashSet<Vector2Int>(data.entities.Keys);
         visuals.SetData(data);

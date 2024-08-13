@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -10,6 +9,7 @@ public class LevelVisuals : MonoBehaviour
 
     [SerializeField] private TileBase groundTile;
     [SerializeField] private TileBase wallTile;
+    [SerializeField] private TileBase iceTile;
 
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private Tilemap objectTilemap;
@@ -51,6 +51,7 @@ public class LevelVisuals : MonoBehaviour
         else if (type.basicType == PuzzleEntityType.Chest) AddChest(entity);
         else if (type.basicType == PuzzleEntityType.Spike) AddSpikes(entity);
         else if (type.basicType == PuzzleEntityType.Conveyor) AddConveyor(entity);
+        else if (type.basicType == PuzzleEntityType.Ice) AddIce(entity);
         else throw new System.NotImplementedException();
 
         if (playSFX) SFX.Play(SFX.Type.Place);
@@ -59,6 +60,12 @@ public class LevelVisuals : MonoBehaviour
     public void AddWall(PuzzleEntity entity)
     {
         objectTilemap.SetTile((Vector3Int)entity.position, wallTile);
+        puzzleEntities.Add(entity, null);
+    }
+
+    public void AddIce(PuzzleEntity entity)
+    {
+        objectTilemap.SetTile((Vector3Int)entity.position, iceTile);
         puzzleEntities.Add(entity, null);
     }
 

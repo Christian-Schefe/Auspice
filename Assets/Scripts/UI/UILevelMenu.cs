@@ -26,13 +26,12 @@ public class UILevelMenu : MonoBehaviour
         levelButtons = new List<UILevelButton>();
         var solutionDict = solutions.Get();
 
-        for (int i = 0; i < levelRegistry.entries.Count; i++)
+        for (int i = 0; i < levelRegistry.GetLevelCount(); i++)
         {
             var levelIndex = i;
-            var level = levelRegistry.entries[levelIndex].levelData;
             var levelButton = Instantiate(levelButtonPrefab, levelButtonContainer);
             levelButton.SetText($"{levelIndex + 1}");
-            var puzzleData = level.text.FromJson<PuzzleData>();
+            var puzzleData = levelRegistry.GetPuzzleData(levelIndex);
 
             levelButton.AddClickListener(() =>
             {

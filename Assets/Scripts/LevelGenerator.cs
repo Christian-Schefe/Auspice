@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Yeast;
@@ -42,6 +41,7 @@ public class LevelGenerator : ScriptableObject
             { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Blue, spikeInitialState:true), null },
             { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Blue, spikeInitialState:false), 5 },
             { new EntityType(PuzzleEntityType.Chest), 2 },
+            { new EntityType(PuzzleEntityType.Ice), null },
             { new EntityType(PuzzleEntityType.Conveyor, direction: Direction.Up), null },
             { new EntityType(PuzzleEntityType.Conveyor, direction: Direction.Down), null },
             { new EntityType(PuzzleEntityType.Conveyor, direction: Direction.Left), null },
@@ -50,7 +50,8 @@ public class LevelGenerator : ScriptableObject
             { new EntityType(PuzzleEntityType.Button, buttonColor: ButtonColor.Blue), null },
             { new EntityType(PuzzleEntityType.Player, playerType: PlayerType.Crab), 3 },
             { new EntityType(PuzzleEntityType.Player, playerType: PlayerType.Octopus), 32 },
-            { new EntityType(PuzzleEntityType.Player, playerType: PlayerType.Fish), 3 }
+            { new EntityType(PuzzleEntityType.Player, playerType: PlayerType.Fish), 3 },
+            { new EntityType(PuzzleEntityType.Player, playerType: PlayerType.Starfish), 3 }
         };
 
         data.starTresholds = starThresholds;

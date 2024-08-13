@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -84,11 +83,11 @@ public class Puzzle
         var players = GetEntities<PlayerEntity>(PuzzleEntityType.Player);
         var buttons = GetEntities<ButtonEntity>(PuzzleEntityType.Button);
 
-        var playerPosition = new Vector2Int[players.Count];
+        var playerPosition = new PlayerState[players.Count];
         for (int i = 0; i < players.Count; i++)
         {
             var player = players[i];
-            playerPosition[i] = player.position;
+            playerPosition[i] = new PlayerState(player.position, player.slidingDirection);
         }
 
         var buttonStates = new bool[buttons.Count];
@@ -107,11 +106,11 @@ public class Puzzle
         var buttons = GetEntities<ButtonEntity>(PuzzleEntityType.Button);
         var pressurePlates = GetEntities<GenericEntity>(PuzzleEntityType.PressurePlate);
 
-        var playerPosition = new int[players.Count];
+        var playerPosition = new PlayerState[players.Count];
         for (int i = 0; i < players.Count; i++)
         {
             var player = players[i];
-            playerPosition[i] = positionIndices[player.position];
+            playerPosition[i] = new(player.position, player.slidingDirection);
         }
 
         var buttonStates = new bool[ButtonEntity.buttonColors.Length];
@@ -147,7 +146,9 @@ public class Puzzle
         for (int i = 0; i < players.Count; i++)
         {
             var player = players[i];
-            player.position = state.playerPosition[i];
+            var playerState = state.playerStates[i];
+            player.position = playerState.position;
+            player.slidingDirection = playerState.slidingDirection;
 
             var from = storedEntityPosition[player];
             entitiesByPosition[from].Remove(PuzzleEntityType.Player);
@@ -212,11 +213,12 @@ public class Puzzle
 
     public bool HasEntity(Vector2Int position, PuzzleEntityType entityType)
     {
-        return entitiesByPosition[position].ContainsKey(entityType);
+        return entitiesByPosition.TryGetValue(position, out var dict) && dict.ContainsKey(entityType);
     }
 
     public bool HasEntity(Vector2Int position, PuzzleEntityType type, out PuzzleEntity entity)
     {
-        return entitiesByPosition[position].TryGetValue(type, out entity);
+        entity = null;
+        return entitiesByPosition.TryGetValue(position, out var dict) && dict.TryGetValue(type, out entity);
     }
 }

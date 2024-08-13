@@ -58,7 +58,7 @@ public enum ButtonColor
 
 public enum PlayerType
 {
-    Crab, Octopus, Fish
+    Crab, Octopus, Fish, Starfish
 }
 
 public enum PuzzleEntityType

@@ -1,40 +1,59 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public struct PuzzleState
+public struct PlayerState : IEquatable<PlayerState>
 {
-    public Vector2Int[] playerPosition;
-    public bool[] buttonStates;
+    public Vector2Int position;
+    public Vector2Int? slidingDirection;
+
+    public PlayerState(Vector2Int position, Vector2Int? slidingDirection)
+    {
+        this.position = position;
+        this.slidingDirection = slidingDirection;
+    }
 
     public override readonly string ToString()
     {
-        var sb = new System.Text.StringBuilder();
-        sb.Append("Puzzle(");
-        for (int i = 0; i < playerPosition.Length; i++)
-        {
-            sb.Append($"Player {i + 1}: {playerPosition[i]}");
-            if (i < playerPosition.Length - 1)
-            {
-                sb.Append(", ");
-            }
-        }
-        for (int i = 0; i < buttonStates.Length; i++)
-        {
-            sb.Append($"Button {i + 1}: {buttonStates[i]}");
-            if (i < buttonStates.Length - 1)
-            {
-                sb.Append(", ");
-            }
-        }
-        sb.Append(")");
-        return sb.ToString();
+        return $"Player({position}, {slidingDirection})";
+
     }
 
-    public PuzzleState(Vector2Int[] playerPosition, bool[] buttonStates)
+    public override readonly bool Equals(object obj)
     {
-        this.playerPosition = playerPosition;
+        return obj is PlayerState other
+            && position == other.position
+            && slidingDirection == other.slidingDirection;
+    }
+
+    public override readonly int GetHashCode()
+    {
+        return HashCode.Combine(position, slidingDirection);
+    }
+
+    public readonly bool Equals(PlayerState other)
+    {
+        return position == other.position && slidingDirection == other.slidingDirection;
+    }
+
+    public static bool operator ==(PlayerState left, PlayerState right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(PlayerState left, PlayerState right)
+    {
+        return !(left == right);
+    }
+}
+
+public struct PuzzleState
+{
+    public PlayerState[] playerStates;
+    public bool[] buttonStates;
+
+    public PuzzleState(PlayerState[] playerStates, bool[] buttonStates)
+    {
+        this.playerStates = playerStates;
         this.buttonStates = buttonStates;
     }
 
@@ -44,23 +63,17 @@ public struct PuzzleState
         {
             return false;
         }
-        if (playerPosition.Length != other.playerPosition.Length || buttonStates.Length != other.buttonStates.Length)
+        if (playerStates.Length != other.playerStates.Length || buttonStates.Length != other.buttonStates.Length)
         {
             return false;
         }
-        for (int i = 0; i < playerPosition.Length; i++)
+        for (int i = 0; i < playerStates.Length; i++)
         {
-            if (playerPosition[i] != other.playerPosition[i])
-            {
-                return false;
-            }
+            if (playerStates[i] != other.playerStates[i]) return false;
         }
         for (int i = 0; i < buttonStates.Length; i++)
         {
-            if (buttonStates[i] != other.buttonStates[i])
-            {
-                return false;
-            }
+            if (buttonStates[i] != other.buttonStates[i]) return false;
         }
         return true;
     }
@@ -68,9 +81,9 @@ public struct PuzzleState
     public override readonly int GetHashCode()
     {
         var hash = new HashCode();
-        foreach (var position in playerPosition)
+        foreach (var state in playerStates)
         {
-            hash.Add(position);
+            hash.Add(state);
         }
         foreach (var buttonState in buttonStates)
         {
@@ -82,13 +95,13 @@ public struct PuzzleState
 
 public struct ReducedPuzzleState
 {
-    public int[] playerPositions;
-    public bool[] buttonStates;
+    public PlayerState[] playerStates;
+    public bool[] colorStates;
 
-    public ReducedPuzzleState(int[] playerPositions, bool[] buttonStates)
+    public ReducedPuzzleState(PlayerState[] playerStates, bool[] colorStates)
     {
-        this.playerPositions = playerPositions;
-        this.buttonStates = buttonStates;
+        this.playerStates = playerStates;
+        this.colorStates = colorStates;
     }
 
     public override readonly bool Equals(object obj)
@@ -97,23 +110,17 @@ public struct ReducedPuzzleState
         {
             return false;
         }
-        if (playerPositions.Length != other.playerPositions.Length || buttonStates.Length != other.buttonStates.Length)
+        if (playerStates.Length != other.playerStates.Length || colorStates.Length != other.colorStates.Length)
         {
             return false;
         }
-        for (int i = 0; i < playerPositions.Length; i++)
+        for (int i = 0; i < playerStates.Length; i++)
         {
-            if (playerPositions[i] != other.playerPositions[i])
-            {
-                return false;
-            }
+            if (playerStates[i] != other.playerStates[i]) return false;
         }
-        for (int i = 0; i < buttonStates.Length; i++)
+        for (int i = 0; i < colorStates.Length; i++)
         {
-            if (buttonStates[i] != other.buttonStates[i])
-            {
-                return false;
-            }
+            if (colorStates[i] != other.colorStates[i]) return false;
         }
         return true;
     }
@@ -121,13 +128,13 @@ public struct ReducedPuzzleState
     public override readonly int GetHashCode()
     {
         var hash = new HashCode();
-        foreach (var position in playerPositions)
+        foreach (var state in playerStates)
         {
-            hash.Add(position);
+            hash.Add(state);
         }
-        foreach (var buttonState in buttonStates)
+        foreach (var colorState in colorStates)
         {
-            hash.Add(buttonState);
+            hash.Add(colorState);
         }
         return hash.ToHashCode();
     }

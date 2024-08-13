@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,6 +18,16 @@ public class PuzzleLogic
         var players = puzzle.GetEntities<PlayerEntity>(PuzzleEntityType.Player);
         for (int i = 0; i < players.Count; i++)
         {
+            if (players[i].slidingDirection is Vector2Int slidingDir)
+            {
+                var slideTo = players[i].position + slidingDir;
+                if (CanWalkStatic(puzzle, slideTo))
+                {
+                    moves.Add(new List<Vector2Int> { slideTo });
+                    continue;
+                }
+            }
+
             var playerMoves = players[i].GetMovePositions(puzzle);
             var validMoves = new List<Vector2Int>();
             foreach (var move in playerMoves)
@@ -61,7 +70,22 @@ public class PuzzleLogic
             players[i].position = to[i];
         }
 
-        if (!DoShift(puzzle, players)) return false;
+        if (!DoShift(puzzle, players, out var shiftPositions)) return false;
+
+        for (int i = 0; i < players.Count; i++)
+        {
+            var playerPos = players[i].position;
+            if (puzzle.HasEntity(playerPos, PuzzleEntityType.Ice))
+            {
+                var dir = shiftPositions[i] ?? (playerPos - oldPositions[i]);
+                dir.Clamp(new Vector2Int(-1, -1), new Vector2Int(1, 1));
+                players[i].slidingDirection = dir;
+            }
+            else
+            {
+                players[i].slidingDirection = null;
+            }
+        }
 
         for (int i = 0; i < players.Count; i++)
         {
@@ -99,17 +123,24 @@ public class PuzzleLogic
         return true;
     }
 
-    private bool DoShift(Puzzle puzzle, List<PlayerEntity> players)
+    private bool DoShift(Puzzle puzzle, List<PlayerEntity> players, out Vector2Int?[] shiftDirections)
     {
         var usedPositions = new HashSet<Vector2Int>();
-        foreach (var player in players)
+        shiftDirections = new Vector2Int?[players.Count];
+
+        for (int i = 0; i < players.Count; i++)
         {
+            var player = players[i];
             Vector2Int playerTo = player.position;
             if (puzzle.HasEntity(player.position, PuzzleEntityType.Conveyor, out var conveyor))
             {
                 var dir = conveyor.GetEntityType().direction.ToVec();
                 var shiftTo = player.position + dir;
-                if (CanWalkStatic(puzzle, shiftTo)) playerTo = shiftTo;
+                if (CanWalkStatic(puzzle, shiftTo))
+                {
+                    playerTo = shiftTo;
+                    shiftDirections[i] = dir;
+                }
             }
 
             if (!usedPositions.Add(playerTo)) return false;
