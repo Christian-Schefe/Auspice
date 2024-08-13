@@ -5,19 +5,20 @@ using Yeast;
 
 public abstract class PlayerEntity : PuzzleEntity
 {
-    public Vector2Int originalPosition;
-
-    public PlayerEntity() : this(Vector2Int.zero, PlayerType.Crab)
-    {
-        originalPosition = Vector2Int.zero;
-    }
-
-    public PlayerEntity(Vector2Int position, PlayerType playerType) : base(position, new EntityType(PuzzleEntityType.Player, playerType: playerType))
-    {
-        originalPosition = position;
-    }
+    public PlayerEntity(Vector2Int position, PlayerType playerType) : base(position, new EntityType(PuzzleEntityType.Player, playerType: playerType)) { }
 
     public abstract List<Vector2Int> GetMovePositions(Puzzle puzzle);
+
+    public static PlayerEntity CreatePlayer(PlayerType playerType, Vector2Int position)
+    {
+        return playerType switch
+        {
+            PlayerType.Crab => new CrabPlayer(position),
+            PlayerType.Octopus => new OctopusPlayer(position),
+            PlayerType.Fish => new FishPlayer(position),
+            _ => throw new System.NotImplementedException(),
+        };
+    }
 }
 
 [IsDerivedClass("CrabPlayer")]

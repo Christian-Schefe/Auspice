@@ -107,37 +107,19 @@ public class PuzzleEditor : MonoBehaviour
             return;
         }
 
-        if (usedPositions.Contains(position))
-        {
-            return;
-        }
-
+        if (usedPositions.Contains(position)) return;
         if (!buildMenu.CanConsumeEntity(selectedType)) return;
 
-        PuzzleEntity entity;
-        if (selectedType.basicType == PuzzleEntityType.Player)
+        PuzzleEntity entity = selectedType.basicType switch
         {
-            entity = selectedType.playerType switch
-            {
-                PlayerType.Crab => new CrabPlayer(position),
-                PlayerType.Octopus => new OctopusPlayer(position),
-                PlayerType.Fish => new FishPlayer(position),
-                _ => throw new System.NotImplementedException(),
-            };
-        }
-        else if (selectedType.basicType == PuzzleEntityType.Button)
-        {
-            entity = new ButtonEntity(selectedType.buttonColor, position);
-        }
-        else
-        {
-            entity = new GenericEntity(position, selectedType);
-        }
+            PuzzleEntityType.Player => PlayerEntity.CreatePlayer(selectedType.playerType, position),
+            PuzzleEntityType.Button => new ButtonEntity(selectedType.buttonColor, position),
+            _ => new GenericEntity(position, selectedType)
+        };
 
         if (!data.TryAddEntity(entity)) return;
         visuals.AddEntity(entity, true);
 
-        Debug.Log($"Placed {selectedType} at {position}");
         usedPositions.Add(position);
         buildMenu.ConsumeEntity(selectedType);
     }

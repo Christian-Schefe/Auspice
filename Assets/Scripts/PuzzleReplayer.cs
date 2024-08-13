@@ -17,12 +17,9 @@ public class PuzzleReplayer : MonoBehaviour
 
     private IEnumerator ReplayPuzzleCoroutine(Puzzle puzzle, List<PuzzleState> actions)
     {
-        Debug.Log("Start Replay: " + actions.Count + " Items");
-
         var players = puzzle.GetEntities<PlayerEntity>(PuzzleEntityType.Player);
         var buttons = puzzle.GetEntities<ButtonEntity>(PuzzleEntityType.Button);
         var spikes = puzzle.GetEntities<GenericEntity>(PuzzleEntityType.Spike);
-        var crates = puzzle.GetEntities<GenericEntity>(PuzzleEntityType.Crate);
 
         for (int i = 0; i < actions.Count; i++)
         {
@@ -48,10 +45,6 @@ public class PuzzleReplayer : MonoBehaviour
             foreach (var button in buttons)
             {
                 levelVisuals.UpdateButtonState(button);
-            }
-            foreach (var crate in crates)
-            {
-                levelVisuals.UpdateEntityPosition(crate);
             }
             foreach (var spike in spikes)
             {

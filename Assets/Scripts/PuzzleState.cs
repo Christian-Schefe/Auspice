@@ -6,7 +6,6 @@ using UnityEngine;
 public struct PuzzleState
 {
     public Vector2Int[] playerPosition;
-    public Vector2Int[] cratePositions;
     public bool[] buttonStates;
 
     public override readonly string ToString()
@@ -29,22 +28,13 @@ public struct PuzzleState
                 sb.Append(", ");
             }
         }
-        for (int i = 0; i < cratePositions.Length; i++)
-        {
-            sb.Append($"Crate {i + 1}: {cratePositions[i]}");
-            if (i < cratePositions.Length - 1)
-            {
-                sb.Append(", ");
-            }
-        }
         sb.Append(")");
         return sb.ToString();
     }
 
-    public PuzzleState(Vector2Int[] playerPosition, Vector2Int[] cratePositions, bool[] buttonStates)
+    public PuzzleState(Vector2Int[] playerPosition, bool[] buttonStates)
     {
         this.playerPosition = playerPosition;
-        this.cratePositions = cratePositions;
         this.buttonStates = buttonStates;
     }
 
@@ -54,7 +44,7 @@ public struct PuzzleState
         {
             return false;
         }
-        if (playerPosition.Length != other.playerPosition.Length || buttonStates.Length != other.buttonStates.Length || cratePositions.Length != other.cratePositions.Length)
+        if (playerPosition.Length != other.playerPosition.Length || buttonStates.Length != other.buttonStates.Length)
         {
             return false;
         }
@@ -68,13 +58,6 @@ public struct PuzzleState
         for (int i = 0; i < buttonStates.Length; i++)
         {
             if (buttonStates[i] != other.buttonStates[i])
-            {
-                return false;
-            }
-        }
-        for (int i = 0; i < cratePositions.Length; i++)
-        {
-            if (cratePositions[i] != other.cratePositions[i])
             {
                 return false;
             }
@@ -93,10 +76,6 @@ public struct PuzzleState
         {
             hash.Add(buttonState);
         }
-        foreach (var position in cratePositions)
-        {
-            hash.Add(position);
-        }
         return hash.ToHashCode();
     }
 }
@@ -104,14 +83,12 @@ public struct PuzzleState
 public struct ReducedPuzzleState
 {
     public int[] playerPositions;
-    public int[] cratePositions;
     public bool[] buttonStates;
 
-    public ReducedPuzzleState(int[] playerPositions, int[] cratePositions, bool[] buttonStates)
+    public ReducedPuzzleState(int[] playerPositions, bool[] buttonStates)
     {
         this.playerPositions = playerPositions;
         this.buttonStates = buttonStates;
-        this.cratePositions = cratePositions;
     }
 
     public override readonly bool Equals(object obj)
@@ -120,20 +97,13 @@ public struct ReducedPuzzleState
         {
             return false;
         }
-        if (playerPositions.Length != other.playerPositions.Length || cratePositions.Length != other.cratePositions.Length || buttonStates.Length != other.buttonStates.Length)
+        if (playerPositions.Length != other.playerPositions.Length || buttonStates.Length != other.buttonStates.Length)
         {
             return false;
         }
         for (int i = 0; i < playerPositions.Length; i++)
         {
             if (playerPositions[i] != other.playerPositions[i])
-            {
-                return false;
-            }
-        }
-        for (int i = 0; i < cratePositions.Length; i++)
-        {
-            if (cratePositions[i] != other.cratePositions[i])
             {
                 return false;
             }
@@ -152,10 +122,6 @@ public struct ReducedPuzzleState
     {
         var hash = new HashCode();
         foreach (var position in playerPositions)
-        {
-            hash.Add(position);
-        }
-        foreach (var position in cratePositions)
         {
             hash.Add(position);
         }

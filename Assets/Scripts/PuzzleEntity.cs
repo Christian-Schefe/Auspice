@@ -16,6 +16,16 @@ public abstract class PuzzleEntity
     }
 
     public EntityType GetEntityType() => entityType;
+
+    public static PuzzleEntity CreateEntity(EntityType type, Vector2Int position)
+    {
+        return type.basicType switch
+        {
+            PuzzleEntityType.Player => PlayerEntity.CreatePlayer(type.playerType, position),
+            PuzzleEntityType.Button => new ButtonEntity(type.buttonColor, position),
+            _ => new GenericEntity(position, type)
+        };
+    }
 }
 
 [IsDerivedClass("GenericEntity")]
@@ -59,7 +69,7 @@ public enum PuzzleEntityType
     Spike,
     Button,
     Player,
-    Crate,
+    Ice,
     Conveyor,
     PressurePlate
 }
@@ -67,6 +77,21 @@ public enum PuzzleEntityType
 public enum Direction
 {
     Right, Left, Up, Down
+}
+
+public static class DirectionExtensions
+{
+    public static Vector2Int ToVec(this Direction direction)
+    {
+        return direction switch
+        {
+            Direction.Right => Vector2Int.right,
+            Direction.Left => Vector2Int.left,
+            Direction.Up => Vector2Int.up,
+            Direction.Down => Vector2Int.down,
+            _ => Vector2Int.zero
+        };
+    }
 }
 
 [Serializable]

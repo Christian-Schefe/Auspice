@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine.UIElements;
 
 public class LevelVisuals : MonoBehaviour
 {
@@ -19,7 +18,7 @@ public class LevelVisuals : MonoBehaviour
     [SerializeField] private ButtonVisuals buttonPrefab;
     [SerializeField] private PlayerVisuals playerPrefab;
     [SerializeField] private EntityVisuals chestPrefab;
-    [SerializeField] private EntityVisuals cratePrefab;
+    [SerializeField] private ConveyorVisuals conveyorPrefab;
 
     private readonly Dictionary<PuzzleEntity, EntityVisuals> puzzleEntities = new();
 
@@ -51,7 +50,7 @@ public class LevelVisuals : MonoBehaviour
         else if (type.basicType == PuzzleEntityType.Player) AddPlayer(entity);
         else if (type.basicType == PuzzleEntityType.Chest) AddChest(entity);
         else if (type.basicType == PuzzleEntityType.Spike) AddSpikes(entity);
-        else if (type.basicType == PuzzleEntityType.Crate) AddCrate(entity);
+        else if (type.basicType == PuzzleEntityType.Conveyor) AddConveyor(entity);
         else throw new System.NotImplementedException();
 
         if (playSFX) SFX.Play(SFX.Type.Place);
@@ -93,10 +92,12 @@ public class LevelVisuals : MonoBehaviour
         puzzleEntities.Add(spike, instance);
     }
 
-    public void AddCrate(PuzzleEntity crate)
+    public void AddConveyor(PuzzleEntity conveyor)
     {
-        var instance = Instantiate(cratePrefab, WorldPos(crate.position), Quaternion.identity);
-        puzzleEntities.Add(crate, instance);
+        var type = conveyor.GetEntityType();
+        var instance = Instantiate(conveyorPrefab, WorldPos(conveyor.position), Quaternion.identity);
+        instance.SetType(type);
+        puzzleEntities.Add(conveyor, instance);
     }
 
     public void UpdateEntityPosition(PuzzleEntity entity)

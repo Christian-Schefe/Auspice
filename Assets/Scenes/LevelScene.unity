@@ -1404,7 +1404,7 @@ MonoBehaviour:
   buttonPrefab: {fileID: 2161879236524441779, guid: 5799c5c4344a9bc4f9f5814db652f1b6, type: 3}
   playerPrefab: {fileID: -7935279478830515042, guid: c6a28c7542ec3e34cbadc16144824994, type: 3}
   chestPrefab: {fileID: 6264213723102833024, guid: 951dee53ccb6e7246a5b4cec85fd6e33, type: 3}
-  cratePrefab: {fileID: 2799701088566611978, guid: 3120e686f48b98e4c9e98d55c39b58f6, type: 3}
+  conveyorPrefab: {fileID: 3601908671659846462, guid: 4da6eaea6c4ded4439a865e0979b4eab, type: 3}
 --- !u!1 &986202336
 GameObject:
   m_ObjectHideFlags: 0
@@ -1464,79 +1464,120 @@ MonoBehaviour:
       buttonColor: 0
       spikeInitialState: 0
       playerType: 0
+      direction: 0
     icon: {fileID: 1362699859, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
   - type:
       basicType: 1
       buttonColor: 0
       spikeInitialState: 0
       playerType: 0
+      direction: 0
     icon: {fileID: -667129138, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
   - type:
       basicType: 2
       buttonColor: 0
       spikeInitialState: 0
       playerType: 0
+      direction: 0
     icon: {fileID: -788408014, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
   - type:
       basicType: 3
       buttonColor: 0
       spikeInitialState: 0
       playerType: 0
+      direction: 0
     icon: {fileID: -394579013, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
   - type:
       basicType: 3
       buttonColor: 0
       spikeInitialState: 1
       playerType: 0
+      direction: 0
     icon: {fileID: -1270377434, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
   - type:
       basicType: 3
       buttonColor: 1
       spikeInitialState: 0
       playerType: 0
+      direction: 0
     icon: {fileID: -519478516, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
   - type:
       basicType: 3
       buttonColor: 1
       spikeInitialState: 1
       playerType: 0
+      direction: 0
     icon: {fileID: -1849667699, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
   - type:
       basicType: 4
       buttonColor: 0
       spikeInitialState: 0
       playerType: 0
+      direction: 0
     icon: {fileID: -366742648, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
   - type:
       basicType: 4
       buttonColor: 1
       spikeInitialState: 0
       playerType: 0
+      direction: 0
     icon: {fileID: 1052373530, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
   - type:
       basicType: 6
       buttonColor: 1
       spikeInitialState: 0
       playerType: 0
+      direction: 0
     icon: {fileID: -1831053822, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
   - type:
       basicType: 5
       buttonColor: 1
       spikeInitialState: 0
       playerType: 0
+      direction: 0
     icon: {fileID: -1559163241, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
   - type:
       basicType: 5
       buttonColor: 1
       spikeInitialState: 0
       playerType: 1
+      direction: 0
     icon: {fileID: -1978703212, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
   - type:
       basicType: 5
       buttonColor: 1
       spikeInitialState: 0
       playerType: 2
+      direction: 0
     icon: {fileID: 949259356, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
+  - type:
+      basicType: 7
+      buttonColor: 1
+      spikeInitialState: 0
+      playerType: 2
+      direction: 0
+    icon: {fileID: -1826842820, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
+  - type:
+      basicType: 7
+      buttonColor: 1
+      spikeInitialState: 0
+      playerType: 2
+      direction: 1
+    icon: {fileID: -491812478, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
+  - type:
+      basicType: 7
+      buttonColor: 1
+      spikeInitialState: 0
+      playerType: 2
+      direction: 2
+    icon: {fileID: -498942667, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
+  - type:
+      basicType: 7
+      buttonColor: 1
+      spikeInitialState: 0
+      playerType: 2
+      direction: 3
+    icon: {fileID: -759219117, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
 --- !u!1 &1036060194
 GameObject:
   m_ObjectHideFlags: 0

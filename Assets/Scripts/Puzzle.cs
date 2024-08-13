@@ -83,7 +83,6 @@ public class Puzzle
     {
         var players = GetEntities<PlayerEntity>(PuzzleEntityType.Player);
         var buttons = GetEntities<ButtonEntity>(PuzzleEntityType.Button);
-        var crates = GetEntities<GenericEntity>(PuzzleEntityType.Crate);
 
         var playerPosition = new Vector2Int[players.Count];
         for (int i = 0; i < players.Count; i++)
@@ -99,21 +98,13 @@ public class Puzzle
             buttonStates[i] = button.isPressed;
         }
 
-        var cratePositions = new Vector2Int[crates.Count];
-        for (int i = 0; i < crates.Count; i++)
-        {
-            var crate = crates[i];
-            cratePositions[i] = crate.position;
-        }
-
-        return new PuzzleState(playerPosition, cratePositions, buttonStates);
+        return new PuzzleState(playerPosition, buttonStates);
     }
 
     public ReducedPuzzleState GetReducedPuzzleState()
     {
         var players = GetEntities<PlayerEntity>(PuzzleEntityType.Player);
         var buttons = GetEntities<ButtonEntity>(PuzzleEntityType.Button);
-        var crates = GetEntities<GenericEntity>(PuzzleEntityType.Crate);
         var pressurePlates = GetEntities<GenericEntity>(PuzzleEntityType.PressurePlate);
 
         var playerPosition = new int[players.Count];
@@ -122,14 +113,6 @@ public class Puzzle
             var player = players[i];
             playerPosition[i] = positionIndices[player.position];
         }
-
-        var cratePositions = new List<int>();
-        for (int i = 0; i < crates.Count; i++)
-        {
-            var crate = crates[i];
-            cratePositions.Add(positionIndices[crate.position]);
-        }
-        cratePositions.Sort();
 
         var buttonStates = new bool[ButtonEntity.buttonColors.Length];
         for (int i = 0; i < buttons.Count; i++)
@@ -145,21 +128,20 @@ public class Puzzle
         for (int i = 0; i < pressurePlates.Count; i++)
         {
             var pressurePlate = pressurePlates[i];
-            if (HasEntity(pressurePlate.position, PuzzleEntityType.Crate) || HasEntity(pressurePlate.position, PuzzleEntityType.Player))
+            if (HasEntity(pressurePlate.position, PuzzleEntityType.Player))
             {
                 var color = (int)pressurePlate.GetEntityType().buttonColor;
                 buttonStates[color] = !buttonStates[color];
             }
         }
 
-        return new ReducedPuzzleState(playerPosition, cratePositions.ToArray(), buttonStates);
+        return new ReducedPuzzleState(playerPosition, buttonStates);
     }
 
     public void SetState(PuzzleState state)
     {
         var players = GetEntities<PlayerEntity>(PuzzleEntityType.Player);
         var buttons = GetEntities<ButtonEntity>(PuzzleEntityType.Button);
-        var crates = GetEntities<GenericEntity>(PuzzleEntityType.Crate);
         var pressurePlates = GetEntities<GenericEntity>(PuzzleEntityType.PressurePlate);
 
         for (int i = 0; i < players.Count; i++)
@@ -171,25 +153,10 @@ public class Puzzle
             entitiesByPosition[from].Remove(PuzzleEntityType.Player);
         }
 
-        for (int i = 0; i < crates.Count; i++)
-        {
-            var crate = crates[i];
-            crate.position = state.cratePositions[i];
-
-            var from = storedEntityPosition[crate];
-            entitiesByPosition[from].Remove(PuzzleEntityType.Crate);
-        }
-
         foreach (var player in players)
         {
             entitiesByPosition[player.position].Add(PuzzleEntityType.Player, player);
             storedEntityPosition[player] = player.position;
-        }
-
-        foreach (var crate in crates)
-        {
-            entitiesByPosition[crate.position].Add(PuzzleEntityType.Crate, crate);
-            storedEntityPosition[crate] = crate.position;
         }
 
         var buttonPressCounts = new Dictionary<ButtonColor, int>();
@@ -213,7 +180,7 @@ public class Puzzle
         {
             var pressurePlate = pressurePlates[i];
             var pressurePlateType = pressurePlate.GetEntityType();
-            if (HasEntity(pressurePlate.position, PuzzleEntityType.Crate) || HasEntity(pressurePlate.position, PuzzleEntityType.Player))
+            if (HasEntity(pressurePlate.position, PuzzleEntityType.Player))
             {
                 buttonPressCounts[pressurePlateType.buttonColor]++;
             }
