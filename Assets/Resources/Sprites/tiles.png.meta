@@ -538,7 +538,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tiles_button_blue_extended
+      name: tiles_spikes_blue_extended
       rect:
         serializedVersion: 2
         x: 64
@@ -840,7 +840,7 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -848,6 +848,27 @@ TextureImporter:
       bones: []
       spriteID: 3b0cf451edb873547abd987afd953b34
       internalID: -733706315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiles_portal
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 48
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ea50da0e9e3939a4ea8e19f7ca60491c
+      internalID: 1484517461
       vertices: []
       indices: 
       edges: []
@@ -864,7 +885,6 @@ TextureImporter:
     secondaryTextures: []
     nameFileIdTable:
       tiles_button_blue: 1052373530
-      tiles_button_blue_extended: -1849667699
       tiles_button_blue_pressed: 441154317
       tiles_button_red: -366742648
       tiles_button_red_pressed: -2061729499
@@ -882,6 +902,7 @@ TextureImporter:
       tiles_ice: -1520764014
       tiles_key: -1812539496
       tiles_octopus: -1978703212
+      tiles_portal: 1484517461
       tiles_pressure_plate_blue: -1616920692
       tiles_pressure_plate_blue_pressed: -1604154131
       tiles_pressure_plate_red: 641760671
@@ -889,6 +910,7 @@ TextureImporter:
       tiles_sand: 775232248
       tiles_selection: -1669403849
       tiles_spikes_blue: -519478516
+      tiles_spikes_blue_extended: -1849667699
       tiles_spikes_red: -394579013
       tiles_spikes_red_extended: -1270377434
       tiles_star: 1956890959

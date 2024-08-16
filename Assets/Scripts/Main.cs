@@ -21,6 +21,11 @@ public class Main : MonoBehaviour
             pauseMenu.Open();
             editor.isPaused = true;
         }
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            Time.timeScale = 0.1f;
+        }
     }
 
     private void Unpause()
@@ -36,35 +41,31 @@ public class Main : MonoBehaviour
         var initialState = puzzle.GetState();
 
         var solver = new PuzzleSolver();
-        var solution = GetTimedSolution(puzzle, solver.Solve);
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var maybeSolution = solver.Solve(puzzle);
+        sw.Stop();
+        Debug.Log($"Solved in {sw.Elapsed.TotalSeconds} seconds");
+
         puzzle.SetState(initialState);
 
-        if (solution == null)
+        if (maybeSolution is not SolutionData solution)
         {
             Debug.Log("No solution found!");
         }
         else
         {
-            Debug.Log($"Solution found! ({solution.Count - 1} steps)");
+            Debug.Log($"Solution found! ({solution.StepCount} steps)");
             editor.PlaybackSolution(puzzle, solution);
 
             var solutionDict = solutions.Get();
             var index = editor.GetSelectedLevelIndex();
 
-            if (!solutionDict.TryGetValue(index, out var oldSolution) || oldSolution.solution.Count <= solution.Count)
+            if (!solutionDict.TryGetValue(index, out var oldSolution) || oldSolution.steps.Count <= solution.StepCount)
             {
-                solutionDict[index] = new SolutionData() { solution = solution };
+                solutionDict[index] = solution;
             }
             solutions.MarkDirty();
         }
-    }
-
-    private List<PuzzleState> GetTimedSolution(Puzzle puzzle, System.Func<Puzzle, List<PuzzleState>> solve)
-    {
-        var sw = System.Diagnostics.Stopwatch.StartNew();
-        var solution = solve(puzzle);
-        sw.Stop();
-        Debug.Log($"Solved in {sw.Elapsed.TotalSeconds} seconds");
-        return solution;
     }
 }

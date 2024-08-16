@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PuzzleSolver
 {
-    public List<PuzzleState> Solve(Puzzle puzzle)
+    public SolutionData? Solve(Puzzle puzzle)
     {
         var logic = new PuzzleLogic(puzzle);
         var initialState = puzzle.GetState();
@@ -13,7 +13,7 @@ public class PuzzleSolver
         queue.Enqueue(initialState);
 
         var visited = new HashSet<ReducedPuzzleState>() { initialReducedState };
-        var cameFrom = new Dictionary<PuzzleState, PuzzleState>();
+        var cameFrom = new Dictionary<PuzzleState, SolutionStep>();
 
         while (queue.Count > 0)
         {
@@ -25,40 +25,44 @@ public class PuzzleSolver
                 break;
             }
 
-            foreach (var state in logic.GetNextStates(curState))
+            foreach (var (nextState, turnEvents) in logic.GetNextStates(curState))
             {
-                puzzle.SetState(state);
+                puzzle.SetState(nextState);
                 var newReducedState = puzzle.GetReducedPuzzleState();
 
                 if (visited.Contains(newReducedState)) continue;
                 visited.Add(newReducedState);
 
-                cameFrom[state] = curState;
+                cameFrom[nextState] = new SolutionStep(curState, turnEvents);
 
                 if (puzzle.IsWon())
                 {
-                    return ReconstructPath(cameFrom, state);
+                    return ReconstructPath(cameFrom, nextState);
                 }
 
-                queue.Enqueue(state);
+                queue.Enqueue(nextState);
             }
         }
 
         return null;
     }
 
-    private List<PuzzleState> ReconstructPath(Dictionary<PuzzleState, PuzzleState> cameFrom, PuzzleState current)
+    private SolutionData ReconstructPath(Dictionary<PuzzleState, SolutionStep> cameFrom, PuzzleState current)
     {
-        var path = new List<PuzzleState> { current };
+        var path = new List<SolutionStep>();
 
         while (cameFrom.ContainsKey(current))
         {
-            current = cameFrom[current];
-            path.Add(current);
+            var step = cameFrom[current];
+
+            path.Add(new(current, step.events));
+
+            current = step.state;
         }
+        path.Add(new(current, new List<TurnEvent>()));
 
         path.Reverse();
 
-        return path;
+        return new SolutionData(path);
     }
 }

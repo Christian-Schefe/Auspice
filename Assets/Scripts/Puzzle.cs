@@ -137,7 +137,7 @@ public class Puzzle
         return new ReducedPuzzleState(playerPosition, buttonStates);
     }
 
-    public void SetState(PuzzleState state)
+    public void UpdateState()
     {
         var players = GetEntities<PlayerEntity>(PuzzleEntityType.Player);
         var buttons = GetEntities<ButtonEntity>(PuzzleEntityType.Button);
@@ -146,10 +146,6 @@ public class Puzzle
         for (int i = 0; i < players.Count; i++)
         {
             var player = players[i];
-            var playerState = state.playerStates[i];
-            player.position = playerState.position;
-            player.slidingDirection = playerState.slidingDirection;
-
             var from = storedEntityPosition[player];
             entitiesByPosition[from].Remove(PuzzleEntityType.Player);
         }
@@ -170,7 +166,6 @@ public class Puzzle
         {
             var button = buttons[i];
             var buttonType = button.GetEntityType();
-            button.isPressed = state.buttonStates[i];
             if (button.isPressed)
             {
                 buttonPressCounts[buttonType.buttonColor]++;
@@ -193,6 +188,28 @@ public class Puzzle
         }
     }
 
+    public void SetState(PuzzleState state)
+    {
+        var players = GetEntities<PlayerEntity>(PuzzleEntityType.Player);
+        var buttons = GetEntities<ButtonEntity>(PuzzleEntityType.Button);
+
+        for (int i = 0; i < players.Count; i++)
+        {
+            var player = players[i];
+            var playerState = state.playerStates[i];
+            player.position = playerState.position;
+            player.slidingDirection = playerState.slidingDirection;
+        }
+
+        for (int i = 0; i < buttons.Count; i++)
+        {
+            var button = buttons[i];
+            button.isPressed = state.buttonStates[i];
+        }
+
+        UpdateState();
+    }
+
     public bool IsWon()
     {
         var players = GetEntities<PlayerEntity>(PuzzleEntityType.Player);
@@ -203,7 +220,7 @@ public class Puzzle
                 return false;
             }
         }
-        return true;
+        return players.Count > 0;
     }
 
     public bool IsValidPosition(Vector2Int position)
@@ -220,5 +237,16 @@ public class Puzzle
     {
         entity = null;
         return entitiesByPosition.TryGetValue(position, out var dict) && dict.TryGetValue(type, out entity);
+    }
+
+    public bool HasEntity<T>(Vector2Int position, PuzzleEntityType type, out T entity) where T : PuzzleEntity
+    {
+        entity = null;
+        if (entitiesByPosition.TryGetValue(position, out var dict) && dict.TryGetValue(type, out var puzzleEntity))
+        {
+            entity = (T)puzzleEntity;
+            return true;
+        }
+        return false;
     }
 }

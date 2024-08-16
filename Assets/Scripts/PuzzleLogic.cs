@@ -10,7 +10,7 @@ public class PuzzleLogic
         this.puzzle = puzzle;
     }
 
-    public List<PuzzleState> GetNextStates(PuzzleState state)
+    public List<(PuzzleState, List<TurnEvent>)> GetNextStates(PuzzleState state)
     {
         puzzle.SetState(state);
 
@@ -42,22 +42,23 @@ public class PuzzleLogic
 
         var permutations = GetUniqueChoicePermutations(moves);
 
-        var nextStates = new List<PuzzleState>();
+        var nextStates = new List<(PuzzleState, List<TurnEvent>)>();
 
         foreach (var moveChoice in permutations)
         {
-            if (TryMovePlayers(state, moveChoice, out var nextState))
+            if (TryMovePlayers(state, moveChoice, out var nextState, out var turnEvents))
             {
-                nextStates.Add(nextState);
+                nextStates.Add((nextState, turnEvents));
             }
         }
 
         return nextStates;
     }
 
-    public bool TryMovePlayers(PuzzleState state, List<Vector2Int> to, out PuzzleState nextState)
+    public bool TryMovePlayers(PuzzleState state, List<Vector2Int> to, out PuzzleState nextState, out List<TurnEvent> turnEvents)
     {
         nextState = default;
+        turnEvents = new();
 
         puzzle.SetState(state);
         var players = puzzle.GetEntities<PlayerEntity>(PuzzleEntityType.Player);
@@ -70,7 +71,8 @@ public class PuzzleLogic
             players[i].position = to[i];
         }
 
-        if (!DoShift(puzzle, players, out var shiftPositions)) return false;
+        if (!DoShift(puzzle, players, turnEvents, out var shiftPositions)) return false;
+        if (!DoPortal(puzzle, players, turnEvents)) return false;
 
         for (int i = 0; i < players.Count; i++)
         {
@@ -97,6 +99,7 @@ public class PuzzleLogic
             }
         }
 
+        puzzle.UpdateState();
         if (!TestSpikes(puzzle, players)) return false;
 
         nextState = puzzle.GetState();
@@ -123,7 +126,7 @@ public class PuzzleLogic
         return true;
     }
 
-    private bool DoShift(Puzzle puzzle, List<PlayerEntity> players, out Vector2Int?[] shiftDirections)
+    private bool DoShift(Puzzle puzzle, List<PlayerEntity> players, List<TurnEvent> turnEvents, out Vector2Int?[] shiftDirections)
     {
         var usedPositions = new HashSet<Vector2Int>();
         shiftDirections = new Vector2Int?[players.Count];
@@ -132,6 +135,7 @@ public class PuzzleLogic
         {
             var player = players[i];
             Vector2Int playerTo = player.position;
+
             if (puzzle.HasEntity(player.position, PuzzleEntityType.Conveyor, out var conveyor))
             {
                 var dir = conveyor.GetEntityType().direction.ToVec();
@@ -140,7 +144,33 @@ public class PuzzleLogic
                 {
                     playerTo = shiftTo;
                     shiftDirections[i] = dir;
+                    turnEvents.Add(new ShiftEvent(player, player.position));
                 }
+            }
+
+            if (!usedPositions.Add(playerTo)) return false;
+            player.position = playerTo;
+        }
+
+        return true;
+    }
+
+    private bool DoPortal(Puzzle puzzle, List<PlayerEntity> players, List<TurnEvent> turnEvents)
+    {
+        var usedPositions = new HashSet<Vector2Int>();
+
+        for (int i = 0; i < players.Count; i++)
+        {
+            var player = players[i];
+            Vector2Int playerTo = player.position;
+
+            if (puzzle.HasEntity<PortalEntity>(player.position, PuzzleEntityType.Portal, out var portal))
+            {
+                var teleportTo = portal.destination;
+                if (!CanWalkStatic(puzzle, teleportTo)) return false;
+
+                playerTo = teleportTo;
+                turnEvents.Add(new TeleportEvent(player, player.position));
             }
 
             if (!usedPositions.Add(playerTo)) return false;

@@ -8,7 +8,7 @@ public class PuzzleData
     public HashSet<Vector2Int> positions = new();
     public Dictionary<Vector2Int, Dictionary<EntityType, (PuzzleEntity, bool)>> entities = new();
 
-    public Dictionary<EntityType, int?> editableEntities = new();
+    public Dictionary<BuildEntityType, int?> editableEntities = new();
     public List<int> starTresholds = new();
 
     public PuzzleData() { }
@@ -30,19 +30,40 @@ public class PuzzleData
         return false;
     }
 
-    public List<EntityType> Remove(Vector2Int pos)
+    public bool TryGetEditableEntity<T>(Vector2Int pos, EntityType type, out T entity) where T : PuzzleEntity
     {
-        var removedEntities = new List<EntityType>();
+        if (entities.ContainsKey(pos) && entities[pos].TryGetValue(type, out var e) && e.Item2)
+        {
+            entity = (T)e.Item1;
+            return true;
+        }
+        entity = null;
+        return false;
+    }
+
+    public List<PuzzleEntity> Remove(Vector2Int pos)
+    {
+        var removedEntities = new List<PuzzleEntity>();
 
         if (entities.ContainsKey(pos))
         {
-            foreach (var (type, (_, isEditable)) in entities[pos].ToList())
+            foreach (var (type, (e, isEditable)) in entities[pos].ToList())
             {
                 if (!isEditable) continue;
                 entities[pos].Remove(type);
-                removedEntities.Add(type);
+                removedEntities.Add(e);
             }
         }
         return removedEntities;
+    }
+
+    public bool RemoveEntity(Vector2Int pos, EntityType type)
+    {
+        if (entities.ContainsKey(pos) && entities[pos].TryGetValue(type, out var e) && e.Item2)
+        {
+            entities[pos].Remove(type);
+            return true;
+        }
+        return false;
     }
 }

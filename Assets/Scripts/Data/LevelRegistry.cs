@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Yeast;
 
-[CreateAssetMenu(fileName = "LevelRegistry", menuName = "LevelRegistry")]
+[CreateAssetMenu(fileName = "LevelRegistry", menuName = "Data/LevelRegistry")]
 public class LevelRegistry : ScriptableObject
 {
     [SerializeField] private List<Entry> entries;

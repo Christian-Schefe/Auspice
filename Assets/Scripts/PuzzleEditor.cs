@@ -20,6 +20,8 @@ public class PuzzleEditor : MonoBehaviour
     private PuzzleData data;
     private HashSet<Vector2Int> usedPositions;
 
+    private Vector2Int? lastPortalPosition;
+
     public int GetSelectedLevelIndex() => selectedLevelIndex.Get();
 
     private void Awake()
@@ -28,7 +30,7 @@ public class PuzzleEditor : MonoBehaviour
         {
             return;
         }
-        Debug.Log(levelIndex);
+
         data = levelRegistry.GetPuzzleDataInstance(levelIndex);
 
         usedPositions = new HashSet<Vector2Int>(data.entities.Keys);
@@ -43,7 +45,7 @@ public class PuzzleEditor : MonoBehaviour
         selectedType = type;
     }
 
-    public void PlaybackSolution(Puzzle puzzle, List<PuzzleState> solution)
+    public void PlaybackSolution(Puzzle puzzle, SolutionData solution)
     {
         isReplaying = true;
         replayer.endCallback = () =>
@@ -72,18 +74,33 @@ public class PuzzleEditor : MonoBehaviour
         }
 
         var cellPosition = visuals.MouseCellPos();
-        if (!data.positions.Contains(cellPosition)) return;
-
-        if (Input.GetMouseButton(0))
+        if (!data.positions.Contains(cellPosition))
         {
-            OnPlace(cellPosition);
+            visuals.PreviewEntity(new GenericEntity(cellPosition, selectedType), false);
+            return;
         }
-        else if (Input.GetMouseButton(1))
+
+        if (Input.GetMouseButton(1))
         {
             var oldType = selectedType;
             selectedType = new(PuzzleEntityType.None);
             OnPlace(cellPosition);
+            visuals.PreviewEntity(new GenericEntity(cellPosition, selectedType), true);
             selectedType = oldType;
+            return;
+        }
+        else if (Input.GetMouseButton(0))
+        {
+            OnPlace(cellPosition);
+        }
+
+        if (usedPositions.Contains(cellPosition) && selectedType != EntityType.None)
+        {
+            visuals.PreviewEntity(new GenericEntity(cellPosition, selectedType), false);
+        }
+        else
+        {
+            visuals.PreviewEntity(new GenericEntity(cellPosition, selectedType), true);
         }
     }
 
@@ -94,12 +111,24 @@ public class PuzzleEditor : MonoBehaviour
             var removedEntities = data.Remove(position);
             if (removedEntities.Count == 0) return;
 
+            if (position == lastPortalPosition)
+            {
+                lastPortalPosition = null;
+            }
+
             visuals.Remove(position);
             usedPositions.Remove(position);
 
             foreach (var removedEntity in removedEntities)
             {
-                buildMenu.ReturnEntity(removedEntity);
+                buildMenu.ReturnEntity(removedEntity.GetEntityType());
+
+                if (removedEntity is PortalEntity portal && portal.destination is Vector2Int otherPortalPos)
+                {
+                    data.RemoveEntity(otherPortalPos, EntityType.Portal);
+                    visuals.RemoveEntity(otherPortalPos, EntityType.Portal);
+                    usedPositions.Remove(otherPortalPos);
+                }
             }
             return;
         }
@@ -111,6 +140,7 @@ public class PuzzleEditor : MonoBehaviour
         {
             PuzzleEntityType.Player => PlayerEntity.CreatePlayer(selectedType.playerType, position),
             PuzzleEntityType.Button => new ButtonEntity(selectedType.buttonColor, position),
+            PuzzleEntityType.Portal => new PortalEntity(position, lastPortalPosition ?? Vector2Int.zero),
             _ => new GenericEntity(position, selectedType)
         };
 
@@ -119,5 +149,26 @@ public class PuzzleEditor : MonoBehaviour
 
         usedPositions.Add(position);
         buildMenu.ConsumeEntity(selectedType);
+
+        if (selectedType.basicType == PuzzleEntityType.Portal)
+        {
+            if (lastPortalPosition is Vector2Int lastPortalPos)
+            {
+                data.TryGetEditableEntity(lastPortalPos, EntityType.Portal, out PortalEntity otherPortal);
+                otherPortal.destination = position;
+                lastPortalPosition = null;
+            }
+            else
+            {
+                lastPortalPosition = position;
+            }
+        }
+        else if (lastPortalPosition is Vector2Int lastPortalPos)
+        {
+            data.RemoveEntity(lastPortalPos, EntityType.Portal);
+            visuals.RemoveEntity(lastPortalPos, EntityType.Portal);
+            usedPositions.Remove(lastPortalPos);
+            lastPortalPosition = null;
+        }
     }
 }

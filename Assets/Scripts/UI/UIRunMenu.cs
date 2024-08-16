@@ -8,6 +8,7 @@ public class UIRunMenu : MonoBehaviour
 {
     public Main main;
     public Button submitButton;
+    public List<Button> speedButtons;
     public TextMeshProUGUI stepsText;
 
     public UIStarDisplay starDisplay;
@@ -16,6 +17,12 @@ public class UIRunMenu : MonoBehaviour
     private void Awake()
     {
         submitButton.onClick.AddListener(main.Solve);
+        for (int i = 0; i < speedButtons.Count; i++)
+        {
+            int speed = i + 1;
+            speedButtons[i].onClick.AddListener(() => SetSpeed(speed));
+        }
+        SetSpeed(1);
     }
 
     public void SetStepBounds(List<int> thresholds)
@@ -36,5 +43,10 @@ public class UIRunMenu : MonoBehaviour
             }
         }
         starDisplay.SetStars(stars);
+    }
+
+    public void SetSpeed(int speed)
+    {
+        Time.timeScale = speed;
     }
 }

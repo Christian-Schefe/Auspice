@@ -33,25 +33,23 @@ public class LevelGenerator : ScriptableObject
             }
         }
 
-        data.editableEntities = new Dictionary<EntityType, int?>
+        data.editableEntities = new()
         {
-            { new EntityType(PuzzleEntityType.Wall), null },
-            { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Red, spikeInitialState:true), null },
-            { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Red, spikeInitialState:false), 5 },
-            { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Blue, spikeInitialState:true), null },
-            { new EntityType(PuzzleEntityType.Spike, buttonColor: ButtonColor.Blue, spikeInitialState:false), 5 },
-            { new EntityType(PuzzleEntityType.Chest), 2 },
-            { new EntityType(PuzzleEntityType.Ice), null },
-            { new EntityType(PuzzleEntityType.Conveyor, direction: Direction.Up), null },
-            { new EntityType(PuzzleEntityType.Conveyor, direction: Direction.Down), null },
-            { new EntityType(PuzzleEntityType.Conveyor, direction: Direction.Left), null },
-            { new EntityType(PuzzleEntityType.Conveyor, direction: Direction.Right), null },
-            { new EntityType(PuzzleEntityType.Button, buttonColor: ButtonColor.Red), null },
-            { new EntityType(PuzzleEntityType.Button, buttonColor: ButtonColor.Blue), null },
-            { new EntityType(PuzzleEntityType.Player, playerType: PlayerType.Crab), 3 },
-            { new EntityType(PuzzleEntityType.Player, playerType: PlayerType.Octopus), 32 },
-            { new EntityType(PuzzleEntityType.Player, playerType: PlayerType.Fish), 3 },
-            { new EntityType(PuzzleEntityType.Player, playerType: PlayerType.Starfish), 3 }
+            {BuildEntityType.Wall, null},
+            {BuildEntityType.Chest, null},
+            {BuildEntityType.RedButton, null},
+            {BuildEntityType.BlueButton, null},
+            {BuildEntityType.RedSpike, null},
+            {BuildEntityType.BlueSpike, null},
+            {BuildEntityType.Ice, null},
+            {BuildEntityType.Crab, null},
+            {BuildEntityType.Octopus, null},
+            {BuildEntityType.Fish, null},
+            {BuildEntityType.Starfish, null},
+            {BuildEntityType.Conveyor, null},
+            {BuildEntityType.RedPressurePlate, null},
+            {BuildEntityType.BluePressurePlate, null},
+            {BuildEntityType.Portal, null},
         };
 
         data.starTresholds = starThresholds;

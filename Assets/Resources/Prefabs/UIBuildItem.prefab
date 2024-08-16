@@ -54,6 +54,7 @@ MonoBehaviour:
   numberText: {fileID: 3325953025729207363}
   iconImage: {fileID: 1394691363011270143}
   selectorImage: {fileID: 4791645771801307097}
+  spriteRegistry: {fileID: 11400000, guid: 187e59d3c45cdfb439a786460ab75723, type: 2}
 --- !u!1 &5967538920883632158
 GameObject:
   m_ObjectHideFlags: 0

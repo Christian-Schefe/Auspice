@@ -4,36 +4,28 @@ using UnityEngine;
 
 public class ButtonVisuals : EntityVisuals
 {
-    public SpriteRenderer spriteRenderer;
     public List<SpriteEntry> sprites;
-
-    private ButtonColor color;
-    private Dictionary<ButtonColor, (Sprite, Sprite)> spriteMap;
+    private Dictionary<ButtonColor, Sprite> pressedSprites;
 
     private void Awake()
     {
-        spriteMap = new();
+        pressedSprites = new();
         foreach (var sprite in sprites)
         {
-            spriteMap.Add(sprite.color, (sprite.pressedSprite, sprite.notPressedSprite));
+            pressedSprites.Add(sprite.color, sprite.pressedSprite);
         }
-    }
-
-    public void SetType(EntityType type)
-    {
-        color = type.buttonColor;
     }
 
     public void SetState(bool pressed)
     {
-        var (pressedSprite, notPressedSprite) = spriteMap[color];
-        spriteRenderer.sprite = pressed ? pressedSprite : notPressedSprite;
+        var pressedSprite = pressedSprites[type.buttonColor];
+        spriteRenderer.sprite = pressed ? pressedSprite : typeDefaultSprite;
     }
 
     [System.Serializable]
     public class SpriteEntry
     {
         public ButtonColor color;
-        public Sprite pressedSprite, notPressedSprite;
+        public Sprite pressedSprite;
     }
 }

@@ -6,52 +6,82 @@ public class UIBuildMenu : MonoBehaviour
     public RectTransform layoutGroup;
     public PuzzleEditor editor;
     public UIBuildItem buildItemPrefab;
-    public List<IconMapEntry> iconSprites;
+    public SpriteRegistry spriteRegistry;
 
-    private readonly Dictionary<EntityType, (BuildItemData, UIBuildItem)> entityData = new();
+    private readonly Dictionary<BuildEntityType, (NumberBox, UIBuildItem)> entityData = new();
     private UIBuildItem eraserItem;
-    private UIBuildItem selectedItem;
 
-    public void SetData(Dictionary<EntityType, int?> editableEntities)
+    private BuildEntityType selectedType;
+    private int selectedTypeIndex;
+
+    private void Update()
     {
-        var selectErase = new System.Action(() =>
+        if (Input.mouseScrollDelta.y != 0)
         {
-            editor.SetSelectedType(new(PuzzleEntityType.None));
-            selectedItem.SetSelected(false);
-            selectedItem = eraserItem;
-            selectedItem.SetSelected(true);
-        });
+            IncreaseIndex(Input.mouseScrollDelta.y > 0 ? 1 : -1);
+        }
+    }
 
-        var eraserData = new BuildItemData(null, iconSprites.Find(e => e.type.basicType == PuzzleEntityType.None).icon, selectErase);
+    public void SetData(Dictionary<BuildEntityType, int?> editableEntities)
+    {
         eraserItem = Instantiate(buildItemPrefab, layoutGroup);
-        eraserItem.UpdateData(eraserData, false);
-        eraserItem.SetSelected(true);
-        selectedItem = eraserItem;
 
-        foreach (var pair in editableEntities)
+        eraserItem.SetType(BuildEntityType.Eraser);
+        eraserItem.SetOnClick(OnSelect);
+
+        eraserItem.SetNumber(null, false);
+        eraserItem.SetSelected(true);
+
+        entityData[BuildEntityType.Eraser] = (new NumberBox(null), eraserItem);
+
+        foreach (var (buildEntityType, number) in editableEntities)
         {
-            var key = pair.Key;
-            var onSelect = new System.Action(() =>
-            {
-                editor.SetSelectedType(key);
-                selectedItem.SetSelected(false);
-                selectedItem = entityData[key].Item2;
-                selectedItem.SetSelected(true);
-            });
-            var spriteEntry = iconSprites.Find(e => e.type == key);
-            Debug.Assert(spriteEntry != null, $"No sprite found for {key}");
-            var data = new BuildItemData(pair.Value, spriteEntry.icon, onSelect);
             var item = Instantiate(buildItemPrefab, layoutGroup);
-            entityData[key] = (data, item);
-            item.UpdateData(data);
+
+            item.SetType(buildEntityType);
+            item.SetOnClick(OnSelect);
+
+            item.SetNumber(number);
             item.SetSelected(false);
 
+            entityData[buildEntityType] = (new NumberBox(number), item);
+        }
+
+        selectedType = BuildEntityType.Eraser;
+    }
+
+    private void IncreaseIndex(int delta)
+    {
+        var m = BuildEntityTypeRef.GetEntityTypes(selectedType).Count;
+        selectedTypeIndex = (((selectedTypeIndex + delta) % m) + m) % m;
+        entityData[selectedType].Item2.SetIndex(selectedTypeIndex);
+        editor.SetSelectedType(BuildEntityTypeRef.GetEntityTypes(selectedType)[selectedTypeIndex]);
+    }
+
+    private void OnSelect(BuildEntityType type)
+    {
+        if (selectedType == type)
+        {
+            IncreaseIndex(1);
+        }
+        else
+        {
+            var curSelected = entityData[selectedType].Item2;
+            selectedType = type;
+            selectedTypeIndex = 0;
+            curSelected.SetSelected(false);
+            curSelected.SetIndex(0);
+
+            curSelected = entityData[selectedType].Item2;
+            curSelected.SetSelected(true);
+            editor.SetSelectedType(BuildEntityTypeRef.GetEntityTypes(selectedType)[selectedTypeIndex]);
         }
     }
 
     public bool CanConsumeEntity(EntityType type)
     {
-        if (entityData.TryGetValue(type, out var data))
+        var buildType = BuildEntityTypeRef.GetBuildType(type);
+        if (entityData.TryGetValue(buildType, out var data))
         {
             return data.Item1.number != 0;
         }
@@ -61,49 +91,32 @@ public class UIBuildMenu : MonoBehaviour
 
     public void ConsumeEntity(EntityType type)
     {
-        if (entityData.TryGetValue(type, out var data))
+        var buildType = BuildEntityTypeRef.GetBuildType(type);
+        if (entityData.TryGetValue(buildType, out var data))
         {
             if (data.Item1.number == 0) throw new System.InvalidOperationException();
             if (data.Item1.number != null) data.Item1.number--;
-            data.Item2.UpdateData(data.Item1);
+            data.Item2.SetNumber(data.Item1.number);
         }
     }
 
     public void ReturnEntity(EntityType type)
     {
-        if (entityData.TryGetValue(type, out var data))
+        var buildType = BuildEntityTypeRef.GetBuildType(type);
+        if (entityData.TryGetValue(buildType, out var data))
         {
             if (data.Item1.number != null) data.Item1.number++;
-            data.Item2.UpdateData(data.Item1);
+            data.Item2.SetNumber(data.Item1.number);
         }
     }
 
-    public class BuildItemData
+    public class NumberBox
     {
         public int? number;
-        public Sprite icon;
-        public System.Action select;
 
-        public BuildItemData() { }
-
-        public BuildItemData(int? number, Sprite icon, System.Action select)
+        public NumberBox(int? number)
         {
             this.number = number;
-            this.icon = icon;
-            this.select = select;
-        }
-    }
-
-    [System.Serializable]
-    public class IconMapEntry
-    {
-        public EntityType type;
-        public Sprite icon;
-
-        public IconMapEntry(EntityType type, Sprite icon)
-        {
-            this.type = type;
-            this.icon = icon;
         }
     }
 }

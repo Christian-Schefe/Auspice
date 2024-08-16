@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Yeast;
 
@@ -51,6 +52,19 @@ public class ButtonEntity : PuzzleEntity
     public static ButtonColor[] buttonColors = new ButtonColor[] { ButtonColor.Red, ButtonColor.Blue };
 }
 
+[IsDerivedClass("PortalEntity")]
+public class PortalEntity : PuzzleEntity
+{
+    public Vector2Int destination;
+
+    public PortalEntity() : this(Vector2Int.zero, Vector2Int.zero) { }
+
+    public PortalEntity(Vector2Int position, Vector2Int destination) : base(position, new EntityType(PuzzleEntityType.Portal))
+    {
+        this.destination = destination;
+    }
+}
+
 public enum ButtonColor
 {
     Red, Blue
@@ -71,7 +85,8 @@ public enum PuzzleEntityType
     Player,
     Ice,
     Conveyor,
-    PressurePlate
+    PressurePlate,
+    Portal
 }
 
 public enum Direction
@@ -166,5 +181,82 @@ public struct EntityType : IEquatable<EntityType>
             PuzzleEntityType.PressurePlate => $"PressurePlateType({buttonColor})",
             _ => basicType.ToString() + "Type"
         };
+    }
+
+    public static EntityType None => new(PuzzleEntityType.None);
+    public static EntityType Wall => new(PuzzleEntityType.Wall);
+    public static EntityType Chest => new(PuzzleEntityType.Chest);
+    public static EntityType RedOffSpike => new(PuzzleEntityType.Spike, buttonColor: ButtonColor.Red, spikeInitialState: false);
+    public static EntityType RedOnSpike => new(PuzzleEntityType.Spike, buttonColor: ButtonColor.Red, spikeInitialState: true);
+    public static EntityType BlueOffSpike => new(PuzzleEntityType.Spike, buttonColor: ButtonColor.Blue, spikeInitialState: false);
+    public static EntityType BlueOnSpike => new(PuzzleEntityType.Spike, buttonColor: ButtonColor.Blue, spikeInitialState: true);
+    public static EntityType RedButton => new(PuzzleEntityType.Button, buttonColor: ButtonColor.Red);
+    public static EntityType BlueButton => new(PuzzleEntityType.Button, buttonColor: ButtonColor.Blue);
+    public static EntityType Crab => new(PuzzleEntityType.Player, playerType: PlayerType.Crab);
+    public static EntityType Octopus => new(PuzzleEntityType.Player, playerType: PlayerType.Octopus);
+    public static EntityType Fish => new(PuzzleEntityType.Player, playerType: PlayerType.Fish);
+    public static EntityType Starfish => new(PuzzleEntityType.Player, playerType: PlayerType.Starfish);
+    public static EntityType Ice => new(PuzzleEntityType.Ice);
+    public static EntityType RightConveyor => new(PuzzleEntityType.Conveyor, direction: Direction.Right);
+    public static EntityType LeftConveyor => new(PuzzleEntityType.Conveyor, direction: Direction.Left);
+    public static EntityType UpConveyor => new(PuzzleEntityType.Conveyor, direction: Direction.Up);
+    public static EntityType DownConveyor => new(PuzzleEntityType.Conveyor, direction: Direction.Down);
+    public static EntityType RedPressurePlate => new(PuzzleEntityType.PressurePlate, buttonColor: ButtonColor.Red);
+    public static EntityType BluePressurePlate => new(PuzzleEntityType.PressurePlate, buttonColor: ButtonColor.Blue);
+    public static EntityType Portal => new(PuzzleEntityType.Portal);
+}
+
+public enum BuildEntityType
+{
+    Eraser, Wall, Chest, RedSpike, BlueSpike, RedButton, BlueButton, Crab, Octopus, Fish, Starfish, Ice, Conveyor, RedPressurePlate, BluePressurePlate, Portal
+}
+
+public static class BuildEntityTypeRef
+{
+    private static Dictionary<EntityType, BuildEntityType> fromEntityType;
+    private static Dictionary<BuildEntityType, List<EntityType>> toEntityType;
+
+    public static BuildEntityType GetBuildType(EntityType type)
+    {
+        if (fromEntityType == null) BuildTypeReference();
+        return fromEntityType[type];
+    }
+
+    public static List<EntityType> GetEntityTypes(BuildEntityType type)
+    {
+        if (toEntityType == null) BuildTypeReference();
+        return toEntityType[type];
+    }
+
+    private static void BuildTypeReference()
+    {
+        toEntityType = new Dictionary<BuildEntityType, List<EntityType>>()
+        {
+            {BuildEntityType.Eraser, new List<EntityType> {EntityType.None}},
+            {BuildEntityType.Wall, new List<EntityType> {EntityType.Wall}},
+            {BuildEntityType.Chest, new List<EntityType> {EntityType.Chest}},
+            {BuildEntityType.RedSpike, new List<EntityType> {EntityType.RedOnSpike, EntityType.RedOffSpike}},
+            {BuildEntityType.BlueSpike, new List<EntityType> {EntityType.BlueOnSpike, EntityType.BlueOffSpike}},
+            {BuildEntityType.RedButton, new List<EntityType> {EntityType.RedButton}},
+            {BuildEntityType.BlueButton, new List<EntityType> {EntityType.BlueButton}},
+            {BuildEntityType.Crab, new List<EntityType> {EntityType.Crab}},
+            {BuildEntityType.Octopus, new List<EntityType> {EntityType.Octopus}},
+            {BuildEntityType.Fish, new List<EntityType> {EntityType.Fish}},
+            {BuildEntityType.Starfish, new List<EntityType> {EntityType.Starfish}},
+            {BuildEntityType.Ice, new List<EntityType> {EntityType.Ice}},
+            {BuildEntityType.Conveyor, new List<EntityType> {EntityType.UpConveyor, EntityType.RightConveyor, EntityType.DownConveyor, EntityType.LeftConveyor}},
+            {BuildEntityType.RedPressurePlate, new List<EntityType> {EntityType.RedPressurePlate}},
+            {BuildEntityType.BluePressurePlate, new List<EntityType> {EntityType.BluePressurePlate}},
+            {BuildEntityType.Portal, new List<EntityType> {EntityType.Portal} }
+        };
+
+        fromEntityType = new Dictionary<EntityType, BuildEntityType>();
+        foreach (var (key, value) in toEntityType)
+        {
+            foreach (var entityType in value)
+            {
+                fromEntityType[entityType] = key;
+            }
+        }
     }
 }
