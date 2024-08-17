@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -15,19 +14,30 @@ public class PuzzleData
 
     public void SetPositions(HashSet<Vector2Int> positions) => this.positions = positions;
 
+    public bool CanAddEntity(PuzzleEntity entity)
+    {
+        if (!positions.Contains(entity.position)) return false;
+        if (!entities.TryGetValue(entity.position, out var dict)) return true;
+        return !dict.ContainsKey(entity.GetEntityType());
+    }
+
     public bool TryAddEntity(PuzzleEntity entity, bool isEditable = true)
+    {
+        if (!CanAddEntity(entity)) return false;
+        AddEntity(entity, isEditable);
+        return true;
+    }
+
+    public void AddEntity(PuzzleEntity entity, bool isEditable = true)
     {
         if (!entities.ContainsKey(entity.position))
         {
             entities.Add(entity.position, new Dictionary<EntityType, (PuzzleEntity, bool)> { { entity.GetEntityType(), (entity, isEditable) } });
-            return true;
         }
-        else if (!entities[entity.position].ContainsKey(entity.GetEntityType()))
+        else
         {
             entities[entity.position].Add(entity.GetEntityType(), (entity, isEditable));
-            return true;
         }
-        return false;
     }
 
     public bool TryGetEditableEntity<T>(Vector2Int pos, EntityType type, out T entity) where T : PuzzleEntity

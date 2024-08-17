@@ -42,7 +42,7 @@ public class UILevelMenu : MonoBehaviour
 
             if (solutionDict.TryGetValue(i, out var solution))
             {
-                var steps = solution.steps.Count - 1;
+                var steps = solution.steps.Length - 1;
                 var stars = GetStars(puzzleData.starTresholds, steps);
                 levelButton.starDisplay.SetStars(stars);
             }

@@ -104,7 +104,7 @@ public class Puzzle
     {
         var players = GetEntities<PlayerEntity>(PuzzleEntityType.Player);
         var buttons = GetEntities<ButtonEntity>(PuzzleEntityType.Button);
-        var pressurePlates = GetEntities<GenericEntity>(PuzzleEntityType.PressurePlate);
+        var pressurePlates = GetEntities<PressurePlateEntity>(PuzzleEntityType.PressurePlate);
 
         var playerPosition = new PlayerState[players.Count];
         for (int i = 0; i < players.Count; i++)
@@ -127,7 +127,7 @@ public class Puzzle
         for (int i = 0; i < pressurePlates.Count; i++)
         {
             var pressurePlate = pressurePlates[i];
-            if (HasEntity(pressurePlate.position, PuzzleEntityType.Player))
+            if (pressurePlate.isPressed)
             {
                 var color = (int)pressurePlate.GetEntityType().buttonColor;
                 buttonStates[color] = !buttonStates[color];
@@ -141,7 +141,7 @@ public class Puzzle
     {
         var players = GetEntities<PlayerEntity>(PuzzleEntityType.Player);
         var buttons = GetEntities<ButtonEntity>(PuzzleEntityType.Button);
-        var pressurePlates = GetEntities<GenericEntity>(PuzzleEntityType.PressurePlate);
+        var pressurePlates = GetEntities<PressurePlateEntity>(PuzzleEntityType.PressurePlate);
 
         for (int i = 0; i < players.Count; i++)
         {
@@ -179,6 +179,11 @@ public class Puzzle
             if (HasEntity(pressurePlate.position, PuzzleEntityType.Player))
             {
                 buttonPressCounts[pressurePlateType.buttonColor]++;
+                pressurePlate.isPressed = true;
+            }
+            else
+            {
+                pressurePlate.isPressed = false;
             }
         }
 

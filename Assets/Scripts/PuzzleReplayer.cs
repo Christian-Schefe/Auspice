@@ -20,8 +20,9 @@ public class PuzzleReplayer : MonoBehaviour
         var players = puzzle.GetEntities<PlayerEntity>(PuzzleEntityType.Player);
         var buttons = puzzle.GetEntities<ButtonEntity>(PuzzleEntityType.Button);
         var spikes = puzzle.GetEntities<GenericEntity>(PuzzleEntityType.Spike);
+        var pressurePlates = puzzle.GetEntities<PressurePlateEntity>(PuzzleEntityType.PressurePlate);
 
-        for (int i = 0; i < solution.steps.Count; i++)
+        for (int i = 1; i < solution.steps.Length; i++)
         {
             var step = solution.steps[i];
             var wait = SetState(step);
@@ -65,6 +66,10 @@ public class PuzzleReplayer : MonoBehaviour
             foreach (var button in buttons)
             {
                 levelVisuals.UpdateButtonState(button);
+            }
+            foreach (var pressurePlate in pressurePlates)
+            {
+                levelVisuals.UpdatePressurePlateState(pressurePlate);
             }
             foreach (var spike in spikes)
             {

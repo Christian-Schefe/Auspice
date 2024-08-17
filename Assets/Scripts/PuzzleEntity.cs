@@ -52,6 +52,19 @@ public class ButtonEntity : PuzzleEntity
     public static ButtonColor[] buttonColors = new ButtonColor[] { ButtonColor.Red, ButtonColor.Blue };
 }
 
+[IsDerivedClass("PressurePlateEntity")]
+public class PressurePlateEntity : PuzzleEntity
+{
+    public bool isPressed;
+
+    public PressurePlateEntity() : this(ButtonColor.Red, Vector2Int.zero) { }
+
+    public PressurePlateEntity(ButtonColor color, Vector2Int position) : base(position, new EntityType(PuzzleEntityType.PressurePlate, buttonColor: color))
+    {
+        isPressed = false;
+    }
+}
+
 [IsDerivedClass("PortalEntity")]
 public class PortalEntity : PuzzleEntity
 {

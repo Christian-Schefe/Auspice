@@ -16,9 +16,11 @@ public class LevelVisuals : MonoBehaviour
 
     [SerializeField] private SpikeVisuals spikePrefab;
     [SerializeField] private ButtonVisuals buttonPrefab;
+    [SerializeField] private ButtonVisuals pressurePlatePrefab;
+    [SerializeField] private PortalVisuals portalPrefab;
     [SerializeField] private EntityVisuals entityVisuals;
 
-    [SerializeField] private EntityVisuals preview;
+    [SerializeField] private PreviewVisuals preview;
 
     private readonly Dictionary<PuzzleEntity, EntityVisuals> puzzleEntities = new();
 
@@ -42,12 +44,12 @@ public class LevelVisuals : MonoBehaviour
         }
     }
 
-    public void PreviewEntity(PuzzleEntity entity, bool visible)
+    public void PreviewEntity(Vector2Int position, EntityType type, bool visible)
     {
         preview.gameObject.SetActive(visible);
         if (!visible) return;
-        preview.SetType(entity.GetEntityType());
-        preview.transform.position = WorldPos(entity.position);
+        preview.SetType(type);
+        preview.transform.position = WorldPos(position);
     }
 
     public void AddEntity(PuzzleEntity entity, bool playSFX)
@@ -56,7 +58,9 @@ public class LevelVisuals : MonoBehaviour
         if (type.basicType == PuzzleEntityType.Ice) AddTileEntity(entity, iceTile);
         else if (type.basicType == PuzzleEntityType.Wall) AddTileEntity(entity, wallTile);
         else if (type.basicType == PuzzleEntityType.Button) AddButton(entity);
+        else if (type.basicType == PuzzleEntityType.PressurePlate) AddPressurePlate(entity);
         else if (type.basicType == PuzzleEntityType.Spike) AddSpikes(entity);
+        else if (type.basicType == PuzzleEntityType.Portal) AddPortal(entity);
         else AddEntity(entity);
 
         if (playSFX) SFX.Play(SFX.Type.Place);
@@ -72,8 +76,24 @@ public class LevelVisuals : MonoBehaviour
     {
         var instance = Instantiate(buttonPrefab, WorldPos(button.position), Quaternion.identity);
         instance.SetType(button.GetEntityType());
-        instance.SetState(false);
+        instance.SetStateInstant(false);
         puzzleEntities.Add(button, instance);
+    }
+
+    public void AddPressurePlate(PuzzleEntity button)
+    {
+        var instance = Instantiate(pressurePlatePrefab, WorldPos(button.position), Quaternion.identity);
+        instance.SetType(button.GetEntityType());
+        instance.SetStateInstant(false);
+        puzzleEntities.Add(button, instance);
+    }
+
+    public void AddPortal(PuzzleEntity portal)
+    {
+        var instance = Instantiate(portalPrefab, WorldPos(portal.position), Quaternion.identity);
+        instance.SetType(portal.GetEntityType());
+        instance.SetDestination(WorldPos(((PortalEntity)portal).destination));
+        puzzleEntities.Add(portal, instance);
     }
 
     public void AddEntity(PuzzleEntity entity)
@@ -94,7 +114,7 @@ public class LevelVisuals : MonoBehaviour
         var type = spike.GetEntityType();
         var instance = Instantiate(spikePrefab, WorldPos(spike.position), Quaternion.identity);
         instance.SetType(type);
-        instance.SetState(type.spikeInitialState);
+        instance.SetStateInstant(type.spikeInitialState);
         puzzleEntities.Add(spike, instance);
     }
 
@@ -108,12 +128,17 @@ public class LevelVisuals : MonoBehaviour
 
     public void UpdateButtonState(ButtonEntity button)
     {
-        puzzleEntities[button].GetComponent<ButtonVisuals>().SetState(button.isPressed);
+        ((ButtonVisuals)puzzleEntities[button]).SetState(button.isPressed);
+    }
+
+    public void UpdatePressurePlateState(PressurePlateEntity pressurePlate)
+    {
+        ((ButtonVisuals)puzzleEntities[pressurePlate]).SetState(pressurePlate.isPressed);
     }
 
     public void UpdateSpikeState(PuzzleEntity spike, bool buttonState)
     {
-        puzzleEntities[spike].GetComponent<SpikeVisuals>().SetState(buttonState != spike.GetEntityType().spikeInitialState);
+        ((SpikeVisuals)puzzleEntities[spike]).SetState(buttonState != spike.GetEntityType().spikeInitialState);
     }
 
     public void Remove(Vector2Int pos)

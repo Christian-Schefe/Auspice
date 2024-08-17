@@ -19,7 +19,7 @@ public class UIRunMenu : MonoBehaviour
         submitButton.onClick.AddListener(main.Solve);
         for (int i = 0; i < speedButtons.Count; i++)
         {
-            int speed = i + 1;
+            var speed = Mathf.Pow(2, i);
             speedButtons[i].onClick.AddListener(() => SetSpeed(speed));
         }
         SetSpeed(1);
@@ -45,7 +45,7 @@ public class UIRunMenu : MonoBehaviour
         starDisplay.SetStars(stars);
     }
 
-    public void SetSpeed(int speed)
+    public void SetSpeed(float speed)
     {
         Time.timeScale = speed;
     }

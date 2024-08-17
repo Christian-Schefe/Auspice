@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using TMPro;
+using Tweenables;
 using UnityEngine;
 
 public class PuzzleEditor : MonoBehaviour
@@ -10,12 +12,10 @@ public class PuzzleEditor : MonoBehaviour
     public LevelVisuals visuals;
     public UIBuildMenu buildMenu;
     public UIRunMenu runMenu;
-    public PuzzleReplayer replayer;
+    public Main main;
+    public TextMeshProUGUI impossibleText;
 
     private EntityType selectedType;
-
-    private bool isReplaying;
-    public bool isPaused;
 
     private PuzzleData data;
     private HashSet<Vector2Int> usedPositions;
@@ -26,10 +26,7 @@ public class PuzzleEditor : MonoBehaviour
 
     private void Awake()
     {
-        if (!selectedLevelIndex.TryGet(out int levelIndex))
-        {
-            return;
-        }
+        if (!selectedLevelIndex.TryGet(out int levelIndex)) return;
 
         data = levelRegistry.GetPuzzleDataInstance(levelIndex);
 
@@ -38,6 +35,22 @@ public class PuzzleEditor : MonoBehaviour
 
         buildMenu.SetData(data.editableEntities);
         runMenu.SetStepBounds(data.starTresholds);
+        impossibleText.gameObject.SetActive(false);
+    }
+
+    public Puzzle BuildPuzzle()
+    {
+        return new Puzzle(data);
+    }
+
+    public void ShowImpossible()
+    {
+        impossibleText.gameObject.SetActive(true);
+        var runner = impossibleText.TweenScale().From(Vector3.zero).To(Vector3.one).Duration(0.3f).Ease(Easing.CubicOut).RunNew();
+        impossibleText.TweenScale().Delay(2f).From(Vector3.one).To(Vector3.zero).Duration(0.3f).Ease(Easing.CubicIn).OnFinally(() =>
+        {
+            impossibleText.gameObject.SetActive(false);
+        }).RunQueued(ref runner);
     }
 
     public void SetSelectedType(EntityType type)
@@ -45,130 +58,138 @@ public class PuzzleEditor : MonoBehaviour
         selectedType = type;
     }
 
-    public void PlaybackSolution(Puzzle puzzle, SolutionData solution)
-    {
-        isReplaying = true;
-        replayer.endCallback = () =>
-        {
-            isReplaying = false;
-        };
-        replayer.stepCallback = (step) =>
-        {
-            runMenu.SetSteps(step);
-        };
-        replayer.ReplayPuzzle(puzzle, solution);
-    }
-
-    public bool IsReplaying() => isReplaying;
-
-    public Puzzle BuildPuzzle()
-    {
-        return new Puzzle(data);
-    }
-
     private void Update()
     {
-        if (isReplaying || isPaused || data == null)
+        if (main.CurrentState != MainState.Editing || main.IsPaused || data == null)
         {
+            visuals.PreviewEntity(Vector2Int.zero, selectedType, false);
             return;
         }
 
         var cellPosition = visuals.MouseCellPos();
         if (!data.positions.Contains(cellPosition))
         {
-            visuals.PreviewEntity(new GenericEntity(cellPosition, selectedType), false);
+            visuals.PreviewEntity(cellPosition, selectedType, false);
             return;
         }
 
         if (Input.GetMouseButton(1))
         {
-            var oldType = selectedType;
-            selectedType = new(PuzzleEntityType.None);
-            OnPlace(cellPosition);
-            visuals.PreviewEntity(new GenericEntity(cellPosition, selectedType), true);
-            selectedType = oldType;
+            OnPlace(cellPosition, EntityType.None);
+            visuals.PreviewEntity(cellPosition, EntityType.None, true);
             return;
         }
-        else if (Input.GetMouseButton(0))
+
+        if (Input.GetMouseButton(0))
         {
-            OnPlace(cellPosition);
+            OnPlace(cellPosition, selectedType);
         }
 
-        if (usedPositions.Contains(cellPosition) && selectedType != EntityType.None)
-        {
-            visuals.PreviewEntity(new GenericEntity(cellPosition, selectedType), false);
-        }
-        else
-        {
-            visuals.PreviewEntity(new GenericEntity(cellPosition, selectedType), true);
-        }
+        bool showPreview = !usedPositions.Contains(cellPosition) || selectedType == EntityType.None;
+        visuals.PreviewEntity(cellPosition, selectedType, showPreview);
     }
 
-    private void OnPlace(Vector2Int position)
+    private void OnPlace(Vector2Int position, EntityType type)
     {
-        if (selectedType.basicType == PuzzleEntityType.None)
+        if (type.basicType == PuzzleEntityType.None)
         {
-            var removedEntities = data.Remove(position);
-            if (removedEntities.Count == 0) return;
-
-            if (position == lastPortalPosition)
-            {
-                lastPortalPosition = null;
-            }
-
-            visuals.Remove(position);
-            usedPositions.Remove(position);
-
-            foreach (var removedEntity in removedEntities)
-            {
-                buildMenu.ReturnEntity(removedEntity.GetEntityType());
-
-                if (removedEntity is PortalEntity portal && portal.destination is Vector2Int otherPortalPos)
-                {
-                    data.RemoveEntity(otherPortalPos, EntityType.Portal);
-                    visuals.RemoveEntity(otherPortalPos, EntityType.Portal);
-                    usedPositions.Remove(otherPortalPos);
-                }
-            }
+            RemoveAt(position);
             return;
         }
 
-        if (usedPositions.Contains(position)) return;
-        if (!buildMenu.CanConsumeEntity(selectedType)) return;
-
-        PuzzleEntity entity = selectedType.basicType switch
+        if (type.basicType == PuzzleEntityType.Portal)
         {
-            PuzzleEntityType.Player => PlayerEntity.CreatePlayer(selectedType.playerType, position),
-            PuzzleEntityType.Button => new ButtonEntity(selectedType.buttonColor, position),
-            PuzzleEntityType.Portal => new PortalEntity(position, lastPortalPosition ?? Vector2Int.zero),
-            _ => new GenericEntity(position, selectedType)
-        };
-
-        if (!data.TryAddEntity(entity)) return;
-        visuals.AddEntity(entity, true);
-
-        usedPositions.Add(position);
-        buildMenu.ConsumeEntity(selectedType);
-
-        if (selectedType.basicType == PuzzleEntityType.Portal)
-        {
-            if (lastPortalPosition is Vector2Int lastPortalPos)
+            if (lastPortalPosition is Vector2Int portalPos && portalPos != position)
             {
-                data.TryGetEditableEntity(lastPortalPos, EntityType.Portal, out PortalEntity otherPortal);
-                otherPortal.destination = position;
-                lastPortalPosition = null;
+                if (TryAddPortalPair(portalPos, position)) lastPortalPosition = null;
+                else lastPortalPosition = position;
             }
             else
             {
                 lastPortalPosition = position;
             }
+            return;
         }
-        else if (lastPortalPosition is Vector2Int lastPortalPos)
+        lastPortalPosition = null;
+
+        PuzzleEntity entity = type.basicType switch
         {
-            data.RemoveEntity(lastPortalPos, EntityType.Portal);
-            visuals.RemoveEntity(lastPortalPos, EntityType.Portal);
-            usedPositions.Remove(lastPortalPos);
+            PuzzleEntityType.Player => PlayerEntity.CreatePlayer(type.playerType, position),
+            PuzzleEntityType.Button => new ButtonEntity(type.buttonColor, position),
+            PuzzleEntityType.PressurePlate => new PressurePlateEntity(type.buttonColor, position),
+            PuzzleEntityType.Portal => throw new System.Exception("Unreachable"),
+            _ => new GenericEntity(position, type)
+        };
+
+        TryAddEntity(entity);
+    }
+
+    private bool TryAddEntity(PuzzleEntity entity)
+    {
+        var position = entity.position;
+        var type = entity.GetEntityType();
+
+        if (usedPositions.Contains(position)) return false;
+        if (!buildMenu.CanConsumeEntity(type)) return false;
+
+        if (!data.CanAddEntity(entity)) return false;
+
+        data.AddEntity(entity);
+        visuals.AddEntity(entity, true);
+
+        usedPositions.Add(position);
+        buildMenu.ConsumeEntity(type);
+
+        return true;
+    }
+
+    private bool TryAddPortalPair(Vector2Int pos1, Vector2Int pos2)
+    {
+        if (usedPositions.Contains(pos1) || usedPositions.Contains(pos2)) return false;
+        if (!buildMenu.CanConsumeEntity(EntityType.Portal)) return false;
+
+        var portal1 = new PortalEntity(pos1, pos2);
+        var portal2 = new PortalEntity(pos2, pos1);
+
+        if (!data.CanAddEntity(portal1) || !data.CanAddEntity(portal2)) return false;
+
+        data.AddEntity(portal1);
+        data.AddEntity(portal2);
+
+        visuals.AddEntity(portal1, true);
+        visuals.AddEntity(portal2, false);
+
+        usedPositions.Add(pos1);
+        usedPositions.Add(pos2);
+
+        buildMenu.ConsumeEntity(EntityType.Portal);
+
+        return true;
+    }
+
+    private void RemoveAt(Vector2Int position)
+    {
+        var removedEntities = data.Remove(position);
+        if (removedEntities.Count == 0) return;
+
+        if (position == lastPortalPosition)
+        {
             lastPortalPosition = null;
+        }
+
+        visuals.Remove(position);
+        usedPositions.Remove(position);
+
+        foreach (var removedEntity in removedEntities)
+        {
+            buildMenu.ReturnEntity(removedEntity.GetEntityType());
+
+            if (removedEntity is PortalEntity portal && portal.destination is Vector2Int otherPortalPos)
+            {
+                data.RemoveEntity(otherPortalPos, EntityType.Portal);
+                visuals.RemoveEntity(otherPortalPos, EntityType.Portal);
+                usedPositions.Remove(otherPortalPos);
+            }
         }
     }
 }

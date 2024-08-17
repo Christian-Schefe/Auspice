@@ -5,7 +5,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "15d9303d129419e01891475112f82e6182f6423c"
+      "hash": "cf9106706954dfd0a7116f6585917415016896ca"
     },
     "com.meeshroom.yeast": {
       "version": "https://github.com/Christian-Schefe/Yeast.git",

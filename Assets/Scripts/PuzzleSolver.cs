@@ -1,8 +1,21 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 
 public class PuzzleSolver
 {
+    public SolutionData? TimedSolve(Puzzle puzzle)
+    {
+        var sw = new System.Diagnostics.Stopwatch();
+        sw.Start();
+        var solution = Solve(puzzle);
+        sw.Stop();
+        Debug.Log($"Solved in {sw.ElapsedMilliseconds}ms");
+        return solution;
+    }
+
     public SolutionData? Solve(Puzzle puzzle)
     {
         var logic = new PuzzleLogic(puzzle);
@@ -59,10 +72,15 @@ public class PuzzleSolver
 
             current = step.state;
         }
-        path.Add(new(current, new List<TurnEvent>()));
+        path.Add(new(current, new TurnEvent[0]));
 
         path.Reverse();
 
-        return new SolutionData(path);
+        return new SolutionData(path.ToArray());
+    }
+
+    public Task<SolutionData?> SolveAsync(Puzzle puzzle)
+    {
+        return Task.Run(() => TimedSolve(puzzle));
     }
 }

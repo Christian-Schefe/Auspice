@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Tweenables;
 using UnityEngine;
 
 public class ButtonVisuals : EntityVisuals
@@ -17,6 +18,11 @@ public class ButtonVisuals : EntityVisuals
     }
 
     public void SetState(bool pressed)
+    {
+        this.TweenDelayedAction(() => SetStateInstant(pressed), animationSpeed * 0.5f).RunNew();
+    }
+
+    public void SetStateInstant(bool pressed)
     {
         var pressedSprite = pressedSprites[type.buttonColor];
         spriteRenderer.sprite = pressed ? pressedSprite : typeDefaultSprite;

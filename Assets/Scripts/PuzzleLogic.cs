@@ -10,7 +10,7 @@ public class PuzzleLogic
         this.puzzle = puzzle;
     }
 
-    public List<(PuzzleState, List<TurnEvent>)> GetNextStates(PuzzleState state)
+    public List<(PuzzleState, TurnEvent[])> GetNextStates(PuzzleState state)
     {
         puzzle.SetState(state);
 
@@ -42,13 +42,13 @@ public class PuzzleLogic
 
         var permutations = GetUniqueChoicePermutations(moves);
 
-        var nextStates = new List<(PuzzleState, List<TurnEvent>)>();
+        var nextStates = new List<(PuzzleState, TurnEvent[])>();
 
         foreach (var moveChoice in permutations)
         {
             if (TryMovePlayers(state, moveChoice, out var nextState, out var turnEvents))
             {
-                nextStates.Add((nextState, turnEvents));
+                nextStates.Add((nextState, turnEvents.ToArray()));
             }
         }
 

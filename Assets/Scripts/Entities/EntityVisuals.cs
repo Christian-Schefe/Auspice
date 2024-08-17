@@ -11,7 +11,7 @@ public class EntityVisuals : MonoBehaviour
     protected Sprite typeDefaultSprite;
     protected EntityType type;
 
-    private const float animationSpeed = 0.2f;
+    public const float animationSpeed = 0.2f;
 
     public float SetPosition(Vector3 pos)
     {
@@ -59,10 +59,10 @@ public class EntityVisuals : MonoBehaviour
         this.type = type;
         typeDefaultSprite = spriteRegistry.GetSprite(type);
         spriteRenderer.sprite = typeDefaultSprite;
-        spriteRenderer.sortingOrder = GetEntityOrder(type);
+        spriteRenderer.sortingOrder = GetEntityOrder();
     }
 
-    public static int GetEntityOrder(EntityType type)
+    public virtual int GetEntityOrder()
     {
         var baseType = type.basicType;
         return baseType switch

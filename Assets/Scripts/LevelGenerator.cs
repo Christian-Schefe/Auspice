@@ -29,7 +29,7 @@ public class LevelGenerator : ScriptableObject
         {
             if (position.x == 0 || position.x == size.x - 1 || position.y == 0 || position.y == size.y - 1)
             {
-                data.TryAddEntity(new GenericEntity(position, new EntityType(PuzzleEntityType.Wall)), isEditable: false);
+                data.AddEntity(new GenericEntity(position, new EntityType(PuzzleEntityType.Wall)), isEditable: false);
             }
         }
 
