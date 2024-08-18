@@ -9,8 +9,7 @@ public class LevelGenerator : ScriptableObject
     public string levelName;
     public List<int> starThresholds;
 
-    [ContextMenu("Generate")]
-    public void Generate()
+    public PuzzleData GenerateData()
     {
         var positions = new HashSet<Vector2Int>();
 
@@ -33,7 +32,7 @@ public class LevelGenerator : ScriptableObject
             }
         }
 
-        data.editableEntities = new()
+        data.buildableEntityCounts = new()
         {
             {BuildEntityType.Wall, null},
             {BuildEntityType.Chest, null},
@@ -46,6 +45,7 @@ public class LevelGenerator : ScriptableObject
             {BuildEntityType.Octopus, null},
             {BuildEntityType.Fish, null},
             {BuildEntityType.Starfish, null},
+            {BuildEntityType.Penguin, null},
             {BuildEntityType.Conveyor, null},
             {BuildEntityType.RedPressurePlate, null},
             {BuildEntityType.BluePressurePlate, null},
@@ -53,6 +53,14 @@ public class LevelGenerator : ScriptableObject
         };
 
         data.starTresholds = starThresholds;
+
+        return data;
+    }
+
+    [ContextMenu("Generate")]
+    public void Generate()
+    {
+        var data = GenerateData();
 
         var json = data.ToJson();
         WriteTextAsset(json);

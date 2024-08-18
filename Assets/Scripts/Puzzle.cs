@@ -28,16 +28,15 @@ public class Puzzle
             positionIndices.Add(pos, i);
             entitiesByPosition.Add(pos, new());
 
-            if (data.entities.ContainsKey(pos))
-            {
-                foreach (var (type, (entity, _)) in data.entities[pos])
-                {
-                    if (!entitiesByType.ContainsKey(type.basicType)) entitiesByType.Add(type.basicType, new() { entity });
-                    else entitiesByType[type.basicType].Add(entity);
+            if (!data.entities.TryGetValue(pos, out var dict)) continue;
 
-                    entitiesByPosition[pos].Add(type.basicType, entity);
-                    storedEntityPosition.Add(entity, pos);
-                }
+            foreach (var (type, (entity, _)) in dict)
+            {
+                if (!entitiesByType.ContainsKey(type.basicType)) entitiesByType.Add(type.basicType, new() { entity });
+                else entitiesByType[type.basicType].Add(entity);
+
+                entitiesByPosition[pos].Add(type.basicType, entity);
+                storedEntityPosition.Add(entity, pos);
             }
         }
 

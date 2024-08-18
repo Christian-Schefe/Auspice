@@ -105,6 +105,13 @@ MonoBehaviour:
       direction: 0
     sprite: {fileID: -733706315, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
   - type:
+      basicType: 5
+      buttonColor: 0
+      spikeInitialState: 0
+      playerType: 4
+      direction: 0
+    sprite: {fileID: -1157949390, guid: 3257363a752140b489c8365ac8d714d5, type: 3}
+  - type:
       basicType: 6
       buttonColor: 0
       spikeInitialState: 0

@@ -1,16 +1,44 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Yeast;
 
 public class PuzzleData
 {
     public HashSet<Vector2Int> positions = new();
     public Dictionary<Vector2Int, Dictionary<EntityType, (PuzzleEntity, bool)>> entities = new();
 
-    public Dictionary<BuildEntityType, int?> editableEntities = new();
+    public Dictionary<BuildEntityType, int?> buildableEntityCounts = new();
     public List<int> starTresholds = new();
 
     public PuzzleData() { }
+
+    public PuzzleData UneditableClone()
+    {
+        var clone = this.ToJson().FromJson<PuzzleData>();
+        foreach (var (pos, dict) in clone.entities)
+        {
+            var keys = dict.Keys.ToList();
+            foreach (var type in keys)
+            {
+                var entry = clone.entities[pos][type];
+                clone.entities[pos][type] = (entry.Item1, false);
+            }
+        }
+        return clone;
+    }
+
+    public HashSet<Vector2Int> GetUsedPositions()
+    {
+        var usedPositions = new HashSet<Vector2Int>();
+        foreach (var (pos, dict) in entities)
+        {
+            if (dict.Count > 0) usedPositions.Add(pos);
+        }
+        return usedPositions;
+    }
+
+    public void SetBuildableEntityCounts(Dictionary<BuildEntityType, int?> buildableEntityCounts) => this.buildableEntityCounts = buildableEntityCounts;
 
     public void SetPositions(HashSet<Vector2Int> positions) => this.positions = positions;
 
@@ -40,17 +68,6 @@ public class PuzzleData
         }
     }
 
-    public bool TryGetEditableEntity<T>(Vector2Int pos, EntityType type, out T entity) where T : PuzzleEntity
-    {
-        if (entities.ContainsKey(pos) && entities[pos].TryGetValue(type, out var e) && e.Item2)
-        {
-            entity = (T)e.Item1;
-            return true;
-        }
-        entity = null;
-        return false;
-    }
-
     public List<PuzzleEntity> Remove(Vector2Int pos)
     {
         var removedEntities = new List<PuzzleEntity>();
@@ -63,6 +80,7 @@ public class PuzzleData
                 entities[pos].Remove(type);
                 removedEntities.Add(e);
             }
+            if (entities[pos].Count == 0) entities.Remove(pos);
         }
         return removedEntities;
     }

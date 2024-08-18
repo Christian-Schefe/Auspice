@@ -44,4 +44,14 @@ public class LevelRegistry : ScriptableObject
         if (puzzleData == null) Initialize();
         return puzzleData.Count;
     }
+
+    public void AddLevel(TextAsset levelData)
+    {
+        if (puzzleData == null) Initialize();
+        entries.Add(new Entry { levelData = levelData });
+        if (levelData.text.TryFromJson<PuzzleData>(out var data))
+        {
+            puzzleData.Add(data);
+        }
+    }
 }

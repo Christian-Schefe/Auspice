@@ -92,7 +92,8 @@ public class Main : MonoBehaviour
             PlaybackSolution(solution);
 
             var solutionDict = solutions.Get();
-            var index = editor.GetSelectedLevelIndex();
+            var maybeIndex = editor.GetSelectedLevelIndex();
+            if (maybeIndex is not int index) return;
 
             if (!solutionDict.TryGetValue(index, out var oldSolution) || oldSolution.steps.Length <= solution.StepCount)
             {

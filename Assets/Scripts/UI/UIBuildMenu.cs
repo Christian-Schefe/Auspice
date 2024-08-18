@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class UIBuildMenu : MonoBehaviour
@@ -14,12 +15,35 @@ public class UIBuildMenu : MonoBehaviour
     private BuildEntityType selectedType;
     private int selectedTypeIndex;
 
+    private bool isEditMode = false;
+
     private void Update()
     {
         if (Input.mouseScrollDelta.y != 0)
         {
             IncreaseIndex(Input.mouseScrollDelta.y > 0 ? 1 : -1);
         }
+    }
+
+    public void SetEditMode()
+    {
+        var editableEntities = new Dictionary<BuildEntityType, int?>();
+        foreach (var type in BuildEntityTypeRef.GetAllTypes())
+        {
+            if (type != BuildEntityType.Eraser) editableEntities.Add(type, 0);
+        }
+        isEditMode = true;
+        SetData(editableEntities);
+    }
+
+    public Dictionary<BuildEntityType, int?> GetCurrentBuildEntityCounts()
+    {
+        var editableEntities = new Dictionary<BuildEntityType, int?>();
+        foreach (var (type, (val, _)) in entityData)
+        {
+            if (type != BuildEntityType.Eraser && val.number != 0) editableEntities.Add(type, val.number);
+        }
+        return editableEntities;
     }
 
     public void SetData(Dictionary<BuildEntityType, int?> editableEntities)
@@ -31,6 +55,7 @@ public class UIBuildMenu : MonoBehaviour
 
         eraserItem.SetNumber(null, false);
         eraserItem.SetSelected(true);
+        eraserItem.SetOnEditButton(null);
 
         entityData[BuildEntityType.Eraser] = (new NumberBox(null), eraserItem);
 
@@ -43,11 +68,30 @@ public class UIBuildMenu : MonoBehaviour
 
             item.SetNumber(number);
             item.SetSelected(false);
+            item.SetOnEditButton(isEditMode ? OnEditButton : null);
 
             entityData[buildEntityType] = (new NumberBox(number), item);
         }
 
         selectedType = BuildEntityType.Eraser;
+    }
+
+    private void OnEditButton(BuildEntityType type, bool increase)
+    {
+        if (!isEditMode) return;
+
+        var (data, item) = entityData[type];
+        if (increase)
+        {
+            if (data.number == null) data.number = 0;
+            else data.number++;
+        }
+        else
+        {
+            if (data.number == 0) data.number = null;
+            else data.number--;
+        }
+        item.SetNumber(data.number);
     }
 
     private void IncreaseIndex(int delta)
@@ -80,6 +124,8 @@ public class UIBuildMenu : MonoBehaviour
 
     public bool CanConsumeEntity(EntityType type)
     {
+        if (isEditMode) return true;
+
         var buildType = BuildEntityTypeRef.GetBuildType(type);
         if (entityData.TryGetValue(buildType, out var data))
         {
@@ -91,6 +137,8 @@ public class UIBuildMenu : MonoBehaviour
 
     public void ConsumeEntity(EntityType type)
     {
+        if (isEditMode) return;
+
         var buildType = BuildEntityTypeRef.GetBuildType(type);
         if (entityData.TryGetValue(buildType, out var data))
         {
@@ -102,6 +150,8 @@ public class UIBuildMenu : MonoBehaviour
 
     public void ReturnEntity(EntityType type)
     {
+        if (isEditMode) return;
+
         var buildType = BuildEntityTypeRef.GetBuildType(type);
         if (entityData.TryGetValue(buildType, out var data))
         {

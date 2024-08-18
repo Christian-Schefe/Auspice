@@ -6,7 +6,6 @@ using Yeast;
 public class UILevelMenu : MonoBehaviour
 {
     private readonly PersistentValue<Dictionary<int, SolutionData>> solutions = new("solutions", PersistenceMode.GlobalPersistence, new());
-    private readonly PersistentValue<int> selectedLevel = new("selectedLevelIndex", PersistenceMode.GlobalRuntime, 0);
 
     public UIModalWindow window;
 
@@ -19,6 +18,7 @@ public class UILevelMenu : MonoBehaviour
     public LevelRegistry levelRegistry;
 
     public SceneSO levelScene;
+    public UIMainMenu mainMenu;
 
 
     private void Start()
@@ -35,7 +35,7 @@ public class UILevelMenu : MonoBehaviour
 
             levelButton.AddClickListener(() =>
             {
-                selectedLevel.Set(levelIndex);
+                mainMenu.selectedLevel.Set(levelIndex);
                 SceneSystem.LoadScene(levelScene);
             });
             levelButtons.Add(levelButton);

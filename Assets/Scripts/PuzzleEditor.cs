@@ -1,13 +1,15 @@
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Tweenables;
 using UnityEngine;
 
 public class PuzzleEditor : MonoBehaviour
 {
-    private readonly ReadonlyPersistentValue<int> selectedLevelIndex = new("selectedLevelIndex", PersistenceMode.GlobalRuntime);
+    private readonly ReadonlyPersistentValue<int?> selectedLevelIndex = new("selectedLevelIndex", PersistenceMode.GlobalRuntime);
 
     public LevelRegistry levelRegistry;
+    public LevelGenerator levelGenerator;
 
     public LevelVisuals visuals;
     public UIBuildMenu buildMenu;
@@ -22,20 +24,39 @@ public class PuzzleEditor : MonoBehaviour
 
     private Vector2Int? lastPortalPosition;
 
-    public int GetSelectedLevelIndex() => selectedLevelIndex.Get();
+    private bool isEditMode;
+
+    public int? GetSelectedLevelIndex() => selectedLevelIndex.Get();
 
     private void Awake()
     {
-        if (!selectedLevelIndex.TryGet(out int levelIndex)) return;
+        if (!selectedLevelIndex.TryGet(out var levelIndex) || levelIndex is not int index)
+        {
+            data = levelGenerator.GenerateData();
+            buildMenu.SetEditMode();
+            isEditMode = true;
+        }
+        else
+        {
+            data = levelRegistry.GetPuzzleDataInstance(index);
+            buildMenu.SetData(data.buildableEntityCounts);
+            isEditMode = false;
+        }
 
-        data = levelRegistry.GetPuzzleDataInstance(levelIndex);
-
-        usedPositions = new HashSet<Vector2Int>(data.entities.Keys);
+        usedPositions = data.GetUsedPositions();
         visuals.SetData(data);
 
-        buildMenu.SetData(data.editableEntities);
         runMenu.SetStepBounds(data.starTresholds);
         impossibleText.gameObject.SetActive(false);
+    }
+
+    public bool IsEditMode() => isEditMode;
+
+    public PuzzleData GetEditedPuzzleDataClone()
+    {
+        var clone = data.UneditableClone();
+        clone.SetBuildableEntityCounts(buildMenu.GetCurrentBuildEntityCounts());
+        return clone;
     }
 
     public Puzzle BuildPuzzle()
@@ -114,7 +135,7 @@ public class PuzzleEditor : MonoBehaviour
 
         PuzzleEntity entity = type.basicType switch
         {
-            PuzzleEntityType.Player => PlayerEntity.CreatePlayer(type.playerType, position),
+            PuzzleEntityType.Player => new PlayerEntity(type.playerType, position),
             PuzzleEntityType.Button => new ButtonEntity(type.buttonColor, position),
             PuzzleEntityType.PressurePlate => new PressurePlateEntity(type.buttonColor, position),
             PuzzleEntityType.Portal => throw new System.Exception("Unreachable"),

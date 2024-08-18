@@ -873,6 +873,27 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: tiles_penguin
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 48
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 64bac45318c8d414789210ff6c684f8c
+      internalID: -1157949390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -902,6 +923,7 @@ TextureImporter:
       tiles_ice: -1520764014
       tiles_key: -1812539496
       tiles_octopus: -1978703212
+      tiles_penguin: -1157949390
       tiles_portal: 1484517461
       tiles_pressure_plate_blue: -1616920692
       tiles_pressure_plate_blue_pressed: -1604154131
