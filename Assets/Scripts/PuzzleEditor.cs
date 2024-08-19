@@ -6,8 +6,6 @@ using UnityEngine;
 
 public class PuzzleEditor : MonoBehaviour
 {
-    private readonly ReadonlyPersistentValue<int?> selectedLevelIndex = new("selectedLevelIndex", PersistenceMode.GlobalRuntime);
-
     public LevelRegistry levelRegistry;
     public LevelGenerator levelGenerator;
 
@@ -26,11 +24,10 @@ public class PuzzleEditor : MonoBehaviour
 
     private bool isEditMode;
 
-    public int? GetSelectedLevelIndex() => selectedLevelIndex.Get();
-
     private void Awake()
     {
-        if (!selectedLevelIndex.TryGet(out var levelIndex) || levelIndex is not int index)
+        var selectedLevelIndex = main.GetSelectedLevelIndex();
+        if (selectedLevelIndex is not int index)
         {
             data = levelGenerator.GenerateData();
             buildMenu.SetEditMode();
@@ -54,7 +51,7 @@ public class PuzzleEditor : MonoBehaviour
 
     public PuzzleData GetEditedPuzzleDataClone()
     {
-        var clone = data.UneditableClone();
+        var clone = data.Clone(true);
         clone.SetBuildableEntityCounts(buildMenu.GetCurrentBuildEntityCounts());
         return clone;
     }

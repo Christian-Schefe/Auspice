@@ -2046,6 +2046,7 @@ MonoBehaviour:
   replayer: {fileID: 873624373}
   editor: {fileID: 873624374}
   pauseMenu: {fileID: 1212493594}
+  levelRegistry: {fileID: 11400000, guid: aee870ff67bc696499163f2744f035c5, type: 2}
 --- !u!4 &873624372
 Transform:
   m_ObjectHideFlags: 0

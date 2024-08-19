@@ -13,16 +13,22 @@ public class PuzzleData
 
     public PuzzleData() { }
 
-    public PuzzleData UneditableClone()
+    public PuzzleData Clone(bool setUneditable = false)
     {
-        var clone = this.ToJson().FromJson<PuzzleData>();
-        foreach (var (pos, dict) in clone.entities)
+        var clone = new PuzzleData()
         {
-            var keys = dict.Keys.ToList();
-            foreach (var type in keys)
+            positions = new HashSet<Vector2Int>(positions),
+            entities = new Dictionary<Vector2Int, Dictionary<EntityType, (PuzzleEntity, bool)>>(),
+            buildableEntityCounts = new Dictionary<BuildEntityType, int?>(buildableEntityCounts),
+            starTresholds = new List<int>(starTresholds)
+        };
+
+        foreach (var (pos, dict) in entities)
+        {
+            clone.entities.Add(pos, new Dictionary<EntityType, (PuzzleEntity, bool)>());
+            foreach (var (type, (e, isEditable)) in dict)
             {
-                var entry = clone.entities[pos][type];
-                clone.entities[pos][type] = (entry.Item1, false);
+                clone.entities[pos].Add(type, (e.Clone(), isEditable && !setUneditable));
             }
         }
         return clone;
@@ -93,5 +99,13 @@ public class PuzzleData
             return true;
         }
         return false;
+    }
+
+    public string ComputeHash()
+    {
+        var bytes = this.ToBytes();
+        using var md5 = System.Security.Cryptography.SHA256.Create();
+        var hash = md5.ComputeHash(bytes);
+        return System.BitConverter.ToString(hash).Replace("-", "").ToLower();
     }
 }

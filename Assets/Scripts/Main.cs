@@ -7,11 +7,13 @@ using UnityEngine;
 
 public class Main : MonoBehaviour
 {
-    private readonly PersistentValue<Dictionary<int, SolutionData>> solutions = new("solutions", PersistenceMode.GlobalPersistence, new());
+    private readonly PersistentValue<Dictionary<string, SolutionData>> solutions = new("solutions", PersistenceMode.GlobalPersistence, new());
+    private readonly ReadonlyPersistentValue<int?> selectedLevelIndex = new("selectedLevelIndex", PersistenceMode.GlobalRuntime);
 
     public PuzzleReplayer replayer;
     public PuzzleEditor editor;
     public UIPauseMenu pauseMenu;
+    public LevelRegistry levelRegistry;
 
     private Puzzle puzzle;
     private PuzzleState initialState;
@@ -19,6 +21,8 @@ public class Main : MonoBehaviour
     public MainState CurrentState { get; set; }
 
     public bool IsPaused { get; set; }
+
+    public int? GetSelectedLevelIndex() => selectedLevelIndex.GetDefault(out var index);
 
     private void Awake()
     {
@@ -92,12 +96,15 @@ public class Main : MonoBehaviour
             PlaybackSolution(solution);
 
             var solutionDict = solutions.Get();
-            var maybeIndex = editor.GetSelectedLevelIndex();
-            if (maybeIndex is not int index) return;
+            var maybeIndex = GetSelectedLevelIndex();
+            if (maybeIndex is not int index || editor.IsEditMode()) return;
 
-            if (!solutionDict.TryGetValue(index, out var oldSolution) || oldSolution.steps.Length <= solution.StepCount)
+            var hash = levelRegistry.GetPuzzleHash(index);
+
+            if (!solutionDict.TryGetValue(hash, out var oldSolution) || oldSolution.StepCount < solution.StepCount)
             {
-                solutionDict[index] = solution;
+                solutionDict[hash] = solution;
+                Debug.Log("New best solution!");
             }
             solutions.MarkDirty();
         }

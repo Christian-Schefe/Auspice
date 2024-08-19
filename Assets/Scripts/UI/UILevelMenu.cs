@@ -5,7 +5,7 @@ using Yeast;
 
 public class UILevelMenu : MonoBehaviour
 {
-    private readonly PersistentValue<Dictionary<int, SolutionData>> solutions = new("solutions", PersistenceMode.GlobalPersistence, new());
+    private readonly PersistentValue<Dictionary<string, SolutionData>> solutions = new("solutions", PersistenceMode.GlobalPersistence, new());
 
     public UIModalWindow window;
 
@@ -26,6 +26,8 @@ public class UILevelMenu : MonoBehaviour
         levelButtons = new List<UILevelButton>();
         var solutionDict = solutions.Get();
 
+        var solvedLevels = new HashSet<int>();
+
         for (int i = 0; i < levelRegistry.GetLevelCount(); i++)
         {
             var levelIndex = i;
@@ -40,15 +42,32 @@ public class UILevelMenu : MonoBehaviour
             });
             levelButtons.Add(levelButton);
 
-            if (solutionDict.TryGetValue(i, out var solution))
+            var hash = levelRegistry.GetPuzzleHash(levelIndex);
+
+            if (solutionDict.TryGetValue(hash, out var solution))
             {
-                var steps = solution.steps.Length - 1;
+                var steps = solution.StepCount;
                 var stars = GetStars(puzzleData.starTresholds, steps);
                 levelButton.starDisplay.SetStars(stars);
+
+                if (stars > 0) solvedLevels.Add(levelIndex);
             }
             else
             {
                 levelButton.starDisplay.SetStars(0);
+            }
+        }
+
+        for (int i = 0, n = levelButtons.Count; i < n; i++)
+        {
+            var levelButton = levelButtons[i];
+            if (i == 0 || solvedLevels.Contains(i) || solvedLevels.Contains(i - 1))
+            {
+                levelButton.SetUnlocked(true);
+            }
+            else
+            {
+                levelButton.SetUnlocked(false);
             }
         }
     }

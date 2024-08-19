@@ -118,6 +118,12 @@ public class ReadonlyPersistentValue<T>
         return saveState.TryGet(key, out value);
     }
 
+    public T GetDefault(out T value, T defaultValue = default)
+    {
+        if (saveState == null) FindSaveState();
+        return saveState.TryGet(key, out value) ? value : defaultValue;
+    }
+
     public T Get()
     {
         if (saveState == null) FindSaveState();

@@ -16,6 +16,11 @@ public class UILevelButton : MonoBehaviour
         this.text.text = text;
     }
 
+    public void SetUnlocked(bool unlocked)
+    {
+        button.interactable = unlocked;
+    }
+
     public void AddClickListener(UnityAction action)
     {
         button.onClick.AddListener(action);
