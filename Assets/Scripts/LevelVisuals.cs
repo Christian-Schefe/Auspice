@@ -24,6 +24,19 @@ public class LevelVisuals : MonoBehaviour
 
     private readonly Dictionary<PuzzleEntity, EntityVisuals> puzzleEntities = new();
 
+    public void ClearAll()
+    {
+        foreach (var (entity, go) in puzzleEntities)
+        {
+            if (go != null) Destroy(go.gameObject);
+
+            objectTilemap.SetTile((Vector3Int)entity.position, null);
+            groundTilemap.SetTile((Vector3Int)entity.position, null);
+        }
+        puzzleEntities.Clear();
+        preview.gameObject.SetActive(false);
+    }
+
     public void SetData(PuzzleData data)
     {
         var min = data.positions.Aggregate(Vector2Int.Min);

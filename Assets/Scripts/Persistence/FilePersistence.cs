@@ -34,5 +34,16 @@ namespace Persistence
             data = null;
             return false;
         }
+
+        public static bool Delete(string path)
+        {
+            var fullPath = BuildPersistencePath(path);
+            if (File.Exists(fullPath))
+            {
+                File.Delete(fullPath);
+                return true;
+            }
+            return false;
+        }
     }
 }

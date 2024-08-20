@@ -31,5 +31,10 @@ namespace Persistence
             }
             return defaultValue;
         }
+
+        public static bool Delete(string path)
+        {
+            return FilePersistence.Delete(path);
+        }
     }
 }

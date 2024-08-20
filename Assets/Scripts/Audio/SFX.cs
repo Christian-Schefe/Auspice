@@ -6,7 +6,7 @@ using Yeast;
 
 public class SFX : MonoBehaviour
 {
-    private ReadonlyPersistentValue<SettingsData> settingsData;
+    private PersistentValue<SettingsData> settingsData;
 
     private static SFX Instance;
 
@@ -44,8 +44,9 @@ public class SFX : MonoBehaviour
         musicSource.Play();
     }
 
-    private void OnSettingsDataChanged(SettingsData settings)
+    private void OnSettingsDataChanged(bool isPresent, SettingsData settings)
     {
+        if (!isPresent) settings = new() { masterVolume = 1, musicVolume = 1, sfxVolume = 1 };
         musicSource.volume = settings.musicVolume * settings.masterVolume;
         sfxSource.volume = settings.sfxVolume * settings.masterVolume;
     }

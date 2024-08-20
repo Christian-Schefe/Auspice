@@ -1,15 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Yeast;
 
-[CreateAssetMenu(fileName = "LevelGenerator", menuName = "LevelGenerator")]
-public class LevelGenerator : ScriptableObject
+public static class LevelGenerator
 {
-    public Vector2Int size;
-    public string levelName;
-    public List<int> starThresholds;
-
-    public PuzzleData GenerateData()
+    public static PuzzleData GenerateData(Vector2Int size)
     {
         var positions = new HashSet<Vector2Int>();
 
@@ -32,7 +26,7 @@ public class LevelGenerator : ScriptableObject
             }
         }
 
-        data.buildableEntityCounts = new()
+        data.SetBuildableEntityCounts(new()
         {
             {BuildEntityType.Wall, null},
             {BuildEntityType.Chest, null},
@@ -50,33 +44,10 @@ public class LevelGenerator : ScriptableObject
             {BuildEntityType.RedPressurePlate, null},
             {BuildEntityType.BluePressurePlate, null},
             {BuildEntityType.Portal, null},
-        };
+        });
 
-        data.starTresholds = starThresholds;
+        data.SetStarThresholds(new());
 
         return data;
-    }
-
-    [ContextMenu("Generate")]
-    public void Generate()
-    {
-        var data = GenerateData();
-
-        var json = data.ToJson();
-        WriteTextAsset(json);
-
-        //test roundtrip
-        var parsedData = json.FromJson<PuzzleData>();
-        var roundtripJson = parsedData.ToJson();
-        Debug.Log(json == roundtripJson);
-    }
-
-    private void WriteTextAsset(string json)
-    {
-#if UNITY_EDITOR
-        var path = $"Assets/Resources/Levels/{levelName}.json";
-        System.IO.File.WriteAllText(path, json);
-        UnityEditor.AssetDatabase.Refresh();
-#endif
     }
 }

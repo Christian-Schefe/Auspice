@@ -31,7 +31,19 @@ public class PuzzleData
                 clone.entities[pos].Add(type, (e.Clone(), isEditable && !setUneditable));
             }
         }
+        clone.CorrectEntityPositions();
         return clone;
+    }
+
+    public void CorrectEntityPositions()
+    {
+        foreach (var (pos, dict) in entities)
+        {
+            foreach (var (_, (e, _)) in dict)
+            {
+                e.position = pos;
+            }
+        }
     }
 
     public HashSet<Vector2Int> GetUsedPositions()
@@ -45,6 +57,8 @@ public class PuzzleData
     }
 
     public void SetBuildableEntityCounts(Dictionary<BuildEntityType, int?> buildableEntityCounts) => this.buildableEntityCounts = buildableEntityCounts;
+
+    public void SetStarThresholds(List<int> starTresholds) => this.starTresholds = starTresholds;
 
     public void SetPositions(HashSet<Vector2Int> positions) => this.positions = positions;
 
@@ -106,6 +120,6 @@ public class PuzzleData
         var bytes = this.ToBytes();
         using var md5 = System.Security.Cryptography.SHA256.Create();
         var hash = md5.ComputeHash(bytes);
-        return System.BitConverter.ToString(hash).Replace("-", "").ToLower();
+        return System.Convert.ToBase64String(hash);
     }
 }

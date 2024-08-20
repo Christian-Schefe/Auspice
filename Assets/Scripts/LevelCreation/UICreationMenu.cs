@@ -6,6 +6,7 @@ using Yeast;
 
 public class UICreationMenu : MonoBehaviour
 {
+    public Main main;
     public Button exportButton;
     public PuzzleEditor puzzleEditor;
     public LevelRegistry levelRegistry;
@@ -21,6 +22,12 @@ public class UICreationMenu : MonoBehaviour
         {
             exportButton.gameObject.SetActive(false);
         }
+    }
+
+    private void Update()
+    {
+        var interactable = main.CurrentState == MainState.Editing;
+        exportButton.interactable = interactable;
     }
 
     public void ExportLevel()

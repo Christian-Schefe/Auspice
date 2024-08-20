@@ -25,6 +25,12 @@ public class UIRunMenu : MonoBehaviour
         SetSpeed(1);
     }
 
+    private void Update()
+    {
+        bool interactable = main.CurrentState == MainState.Editing;
+        submitButton.interactable = interactable;
+    }
+
     public void SetStepBounds(List<int> thresholds)
     {
         stepThresholds = thresholds;

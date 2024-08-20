@@ -44,7 +44,7 @@ public class LevelRegistry : ScriptableObject
         }
     }
 
-    public PuzzleData GetPuzzleData(int index)
+    public PuzzleData GetOriginalPuzzleData(int index)
     {
         if (puzzleData == null) Initialize();
         return puzzleData[index];
@@ -53,7 +53,7 @@ public class LevelRegistry : ScriptableObject
     public PuzzleData GetPuzzleDataInstance(int index)
     {
         if (puzzleData == null) Initialize();
-        return puzzleData[index].ToJson().FromJson<PuzzleData>();
+        return puzzleData[index].Clone();
     }
 
     public string GetPuzzleHash(int index)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Persistence;
 using UnityEngine;
 using Yeast;
@@ -88,6 +89,7 @@ public class SaveState : MonoBehaviour
     {
         if (mode == PersistenceMode.GlobalRuntime) return;
         if (isLoaded) return;
+        Debug.Log("Loading SaveState " + mode);
 
         var path = GetPath();
         serializedData = JsonPersistence.LoadDefault(path, new Dictionary<string, string>());
@@ -95,25 +97,33 @@ public class SaveState : MonoBehaviour
         isLoaded = true;
     }
 
+    public void Delete()
+    {
+        if (mode == PersistenceMode.GlobalRuntime) return;
+
+        var path = GetPath();
+        JsonPersistence.Delete(path);
+
+        serializedData.Clear();
+        foreach (var key in data.Keys.ToList())
+        {
+            data.Remove(key);
+            OnUpdate(key);
+        }
+    }
+
     public bool TryGetBox<T>(string key, out Box<T> box)
     {
-        if (data.TryGetValue(key, out var anyBox))
+        if (!TryLoadKey<T>(key))
         {
-            if (anyBox is Box<T> typedBox)
-            {
-                box = typedBox;
-                return true;
-            }
+            box = null;
+            return false;
         }
-        else if (serializedData.ContainsKey(key))
+
+        if (data.TryGetValue(key, out var anyBox) && anyBox is Box<T> typedBox)
         {
-            Debug.Log("loaded: " + key + " = " + serializedData[key]);
-            if (serializedData[key].TryFromJson(out T value))
-            {
-                box = new Box<T>(value);
-                data[key] = box;
-                return true;
-            }
+            box = typedBox;
+            return true;
         }
         box = null;
         return false;
@@ -150,19 +160,50 @@ public class SaveState : MonoBehaviour
         OnUpdate(key);
     }
 
+    public void Unset(string key)
+    {
+        if (data.Remove(key))
+        {
+            OnUpdate(key);
+        }
+    }
+
     public void OnUpdate(string key)
     {
         if (listeners.TryGetValue(key, out var listener))
         {
             if (data.TryGetValue(key, out var box))
             {
-                listener.OnValueChanged(box.GetValue());
+                listener.OnValueChanged(true, box.GetValue());
+            }
+            else
+            {
+                listener.OnValueChanged(false, null);
             }
         }
     }
 
-    public void AddListener<T>(string key, Action<T> action)
+    public bool TryLoadKey<T>(string key)
     {
+        if (data.TryGetValue(key, out var anyBox))
+        {
+            return anyBox is Box<T>;
+        }
+        else if (serializedData.ContainsKey(key))
+        {
+            Debug.Log("loading: " + key + " = " + serializedData[key]);
+            if (serializedData[key].TryFromJson(out T value))
+            {
+                data[key] = new Box<T>(value);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void AddListener<T>(string key, Action<bool, T> action)
+    {
+        TryLoadKey<T>(key);
         if (!listeners.TryGetValue(key, out var listener))
         {
             listener = new Listener<T>();
@@ -171,8 +212,9 @@ public class SaveState : MonoBehaviour
         (listener as Listener<T>).AddListener(action);
     }
 
-    public void RemoveListener<T>(string key, Action<T> action)
+    public void RemoveListener<T>(string key, Action<bool, T> action)
     {
+        TryLoadKey<T>(key);
         if (listeners.TryGetValue(key, out var listener))
         {
             (listener as Listener<T>).RemoveListener(action);
@@ -201,24 +243,24 @@ public class SaveState : MonoBehaviour
 
     private interface IListener
     {
-        public void OnValueChanged(object val);
+        public void OnValueChanged(bool isPresent, object val);
     }
 
     public class Listener<T> : IListener
     {
-        public Action<T> onValueChanged;
+        public Action<bool, T> onValueChanged;
 
-        public void OnValueChanged(object val)
+        public void OnValueChanged(bool isPresent, object val)
         {
-            onValueChanged?.Invoke((T)val);
+            onValueChanged?.Invoke(isPresent, isPresent ? (T)val : default);
         }
 
-        public void AddListener(Action<T> action)
+        public void AddListener(Action<bool, T> action)
         {
             onValueChanged += action;
         }
 
-        public void RemoveListener(Action<T> action)
+        public void RemoveListener(Action<bool, T> action)
         {
             onValueChanged -= action;
         }

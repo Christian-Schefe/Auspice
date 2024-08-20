@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class UIMainMenu : MonoBehaviour
 {
-    public readonly PersistentValue<int?> selectedLevel = new("selectedLevelIndex", PersistenceMode.GlobalRuntime, null);
+    public readonly PersistentValue<int?> selectedLevel = new("selectedLevelIndex", PersistenceMode.GlobalRuntime);
 
     public Button levelMenuButton;
     public Button editorButton;
@@ -32,7 +32,7 @@ public class UIMainMenu : MonoBehaviour
 
     public void OnEditorButtonClicked()
     {
-        selectedLevel.Set(null);
+        selectedLevel.Unset();
         SceneSystem.LoadScene(levelScene);
     }
 

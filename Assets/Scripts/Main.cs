@@ -7,8 +7,8 @@ using UnityEngine;
 
 public class Main : MonoBehaviour
 {
-    private readonly PersistentValue<Dictionary<string, SolutionData>> solutions = new("solutions", PersistenceMode.GlobalPersistence, new());
-    private readonly ReadonlyPersistentValue<int?> selectedLevelIndex = new("selectedLevelIndex", PersistenceMode.GlobalRuntime);
+    private readonly PersistentValue<Dictionary<string, SolutionData>> solutions = new("solutions", PersistenceMode.GlobalPersistence);
+    private readonly PersistentValue<int?> selectedLevelIndex = new("selectedLevelIndex", PersistenceMode.GlobalRuntime);
 
     public PuzzleReplayer replayer;
     public PuzzleEditor editor;
@@ -22,7 +22,7 @@ public class Main : MonoBehaviour
 
     public bool IsPaused { get; set; }
 
-    public int? GetSelectedLevelIndex() => selectedLevelIndex.GetDefault(out var index);
+    public int? GetSelectedLevelIndex() => selectedLevelIndex.GetOrDefault(null);
 
     private void Awake()
     {
@@ -95,7 +95,7 @@ public class Main : MonoBehaviour
             Debug.Log($"Solution found! ({solution.StepCount} steps)");
             PlaybackSolution(solution);
 
-            var solutionDict = solutions.Get();
+            var solutionDict = solutions.GetOrCreateRef(new());
             var maybeIndex = GetSelectedLevelIndex();
             if (maybeIndex is not int index || editor.IsEditMode()) return;
 

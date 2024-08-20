@@ -3,17 +3,23 @@ using System.Linq;
 using TMPro;
 using Tweenables;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PuzzleEditor : MonoBehaviour
 {
     public LevelRegistry levelRegistry;
-    public LevelGenerator levelGenerator;
 
     public LevelVisuals visuals;
     public UIBuildMenu buildMenu;
     public UIRunMenu runMenu;
     public Main main;
+
     public TextMeshProUGUI impossibleText;
+    public List<TMP_InputField> starThresholdInputs;
+    public GameObject starThresholdContainer;
+    public GameObject sizeButtonContainer;
+    public Button incWidth, incHeight, decWidth, decHeight;
+    private Vector2Int size = new(10, 10);
 
     private EntityType selectedType;
 
@@ -29,30 +35,87 @@ public class PuzzleEditor : MonoBehaviour
         var selectedLevelIndex = main.GetSelectedLevelIndex();
         if (selectedLevelIndex is not int index)
         {
-            data = levelGenerator.GenerateData();
+            Init(LevelGenerator.GenerateData(new(10, 10)));
             buildMenu.SetEditMode();
             isEditMode = true;
         }
         else
         {
-            data = levelRegistry.GetPuzzleDataInstance(index);
+            Init(levelRegistry.GetPuzzleDataInstance(index));
             buildMenu.SetData(data.buildableEntityCounts);
             isEditMode = false;
         }
 
+        foreach (var input in starThresholdInputs)
+        {
+            if (isEditMode) input.onValueChanged.AddListener((value) => UpdateEditedStarThresholds());
+        }
+        starThresholdContainer.SetActive(isEditMode);
+        sizeButtonContainer.SetActive(isEditMode);
+
+        if (isEditMode) UpdateEditedStarThresholds();
+        else runMenu.SetStepBounds(data.starTresholds);
+
+        impossibleText.gameObject.SetActive(false);
+
+        if (isEditMode)
+        {
+            incWidth.onClick.AddListener(() => ChangeSize(new Vector2Int(1, 0)));
+            incHeight.onClick.AddListener(() => ChangeSize(new Vector2Int(0, 1)));
+            decWidth.onClick.AddListener(() => ChangeSize(new Vector2Int(-1, 0)));
+            decHeight.onClick.AddListener(() => ChangeSize(new Vector2Int(0, -1)));
+        }
+    }
+
+    private void Init(PuzzleData data)
+    {
+        this.data = data;
         usedPositions = data.GetUsedPositions();
         visuals.SetData(data);
+    }
 
-        runMenu.SetStepBounds(data.starTresholds);
-        impossibleText.gameObject.SetActive(false);
+    private void ChangeSize(Vector2Int delta)
+    {
+        if (!isEditMode) return;
+        size += delta;
+        size.Clamp(new Vector2Int(5, 5), new Vector2Int(20, 20));
+        visuals.ClearAll();
+        Init(LevelGenerator.GenerateData(size));
+    }
+
+    private void UpdateEditedStarThresholds()
+    {
+        if (!isEditMode) return;
+        var thresholds = GetEditedStarThresholds();
+        runMenu.SetStepBounds(thresholds);
     }
 
     public bool IsEditMode() => isEditMode;
+
+    public List<int> GetEditedStarThresholds()
+    {
+        var thresholds = new List<int>();
+        foreach (var input in starThresholdInputs)
+        {
+            if (string.IsNullOrEmpty(input.text)) thresholds.Add(0);
+            else if (int.TryParse(input.text, out var threshold))
+            {
+                thresholds.Add(threshold);
+            }
+            else
+            {
+                throw new System.Exception("Invalid star threshold input");
+            }
+        }
+        thresholds.Sort();
+        return thresholds;
+    }
 
     public PuzzleData GetEditedPuzzleDataClone()
     {
         var clone = data.Clone(true);
         clone.SetBuildableEntityCounts(buildMenu.GetCurrentBuildEntityCounts());
+        clone.SetStarThresholds(GetEditedStarThresholds());
         return clone;
     }
 
@@ -76,8 +139,17 @@ public class PuzzleEditor : MonoBehaviour
         selectedType = type;
     }
 
+    private void UpdateInteractability()
+    {
+        bool interactable = main.CurrentState == MainState.Editing && !main.IsPaused && data != null;
+        foreach (var field in starThresholdInputs) field.interactable = interactable;
+        incWidth.interactable = incHeight.interactable = decWidth.interactable = decHeight.interactable = interactable;
+    }
+
     private void Update()
     {
+        UpdateInteractability();
+
         if (main.CurrentState != MainState.Editing || main.IsPaused || data == null)
         {
             visuals.PreviewEntity(Vector2Int.zero, selectedType, false);
